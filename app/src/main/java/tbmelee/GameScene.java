@@ -19,45 +19,33 @@ public class GameScene {
         this.rootNode = rootNode;
         this.assetManager = assetManager;
     }
- 
-    
-public void build() {
-    // Create the blue cube
-    Box box = new Box(1f, 1f, 1f);
-    Geometry cube = new Geometry("Cube", box);
 
-    Material cubeMaterial = new Material(
-        assetManager,
-        "Common/MatDefs/Light/Lighting.j3md"
-    );
-    cubeMaterial.setBoolean("UseMaterialColors", true);
-    cubeMaterial.setColor("Diffuse", ColorRGBA.Blue);
-    cubeMaterial.setColor("Ambient", ColorRGBA.Blue);
+    public void build() {
+        GameMap gameMap = new GameMap(rootNode, assetManager);
+        
 
-    cube.setMaterial(cubeMaterial);
-    rootNode.attachChild(cube);
+        // Create the blue cube
+        Box box = new Box(0.5f, 0.5f, 0.5f);
+        Geometry cube = new Geometry("Cube", box);
 
-    // Create the green ground
-    Box groundBox = new Box(10f, 0.1f, 10f);
-    Geometry ground = new Geometry("Ground", groundBox);
+        Material cubeMaterial = new Material(
+                assetManager,
+                "Common/MatDefs/Light/Lighting.j3md");
+        cubeMaterial.setBoolean("UseMaterialColors", true);
+        cubeMaterial.setColor("Diffuse", ColorRGBA.Blue);
+        cubeMaterial.setColor("Ambient", ColorRGBA.Blue);
 
-    Material groundMaterial = new Material(
-        assetManager,
-        "Common/MatDefs/Light/Lighting.j3md"
-    );
-    groundMaterial.setBoolean("UseMaterialColors", true);
-    groundMaterial.setColor("Diffuse", ColorRGBA.Green);
-    groundMaterial.setColor("Ambient", ColorRGBA.Green);
+        cube.setMaterial(cubeMaterial);
+        Vector3f position = gameMap.tileToWorld(0, 0);
+        cube.setLocalTranslation(position.x + 0.5f, 0.5f, position.z + 0.5f);
+        rootNode.attachChild(cube);
 
-    ground.setMaterial(groundMaterial);
-    ground.setLocalTranslation(0f, -1.1f, 0f);
+        gameMap.build();
 
-    rootNode.attachChild(ground);
-
-    // Light the scene
-    AmbientLight ambient = new AmbientLight();
-    ambient.setColor(ColorRGBA.White);
-    rootNode.addLight(ambient);
-}
+        // Light the scene
+        AmbientLight ambient = new AmbientLight();
+        ambient.setColor(ColorRGBA.White);
+        rootNode.addLight(ambient);
+    }
 
 }
