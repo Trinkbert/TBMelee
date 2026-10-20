@@ -25,20 +25,14 @@ public class GameScene {
         
 
         // Create the blue cube
-        Box box = new Box(0.5f, 0.5f, 0.5f);
-        Geometry cube = new Geometry("Cube", box);
+        GameEntity box = new GameEntity(0, 0, 1f, 1f, 1f);
 
-        Material cubeMaterial = new Material(
-                assetManager,
-                "Common/MatDefs/Light/Lighting.j3md");
-        cubeMaterial.setBoolean("UseMaterialColors", true);
-        cubeMaterial.setColor("Diffuse", ColorRGBA.Blue);
-        cubeMaterial.setColor("Ambient", ColorRGBA.Blue);
+        Geometry boxGeometry = box.createGeometry(assetManager);
 
-        cube.setMaterial(cubeMaterial);
-        Vector3f position = gameMap.tileToWorld(0, 0);
-        cube.setLocalTranslation(position.x + 0.5f, 0.5f, position.z + 0.5f);
-        rootNode.attachChild(cube);
+        Vector3f position = gameMap.tileToWorld(box.getTileX(), box.getTileZ());
+        boxGeometry.setLocalTranslation(position.x + 0.5f, position.y, position.z + 0.5f);
+
+        rootNode.attachChild(boxGeometry);
 
         gameMap.build();
 

@@ -89,7 +89,7 @@ public class GameMap {
 
     // Converts tile coordinates to world coordinates
     public Vector3f tileToWorld(int x, int z) {
-        return new Vector3f(x, 0f, z);
+        return new Vector3f(x, 0.5f, z);
         
     }
 
