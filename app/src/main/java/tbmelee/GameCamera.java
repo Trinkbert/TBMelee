@@ -6,6 +6,8 @@ import com.jme3.math.Vector3f;
 
 public class GameCamera {
 
+    private float halfHeight = 12f;
+
     private final Camera camera;
 
     public GameCamera(Camera camera) {
@@ -25,7 +27,27 @@ public class GameCamera {
         camera.lookAt(target, Vector3f.UNIT_Y);
 
         camera.setParallelProjection(true);
-        camera.setFrustum(1f, 1000f, -21.33f, 21.33f, 12f, -12f);
+        updateFrustum();
+        //camera.setFrustum(1f, 1000f, -21.33f, 21.33f, 12f, -12f);
     }
 
+    public void zoomIn() {
+    halfHeight = Math.max(3f, halfHeight - 1f);
+    updateFrustum();
+    }
+
+    public void zoomOut() {
+    halfHeight = Math.min(60f, halfHeight + 1f);
+    updateFrustum();
+    }
+
+    private void updateFrustum() {
+    float aspect = (float) camera.getWidth() / camera.getHeight();
+
+        camera.setFrustum(
+            1f, 1000f,
+            -halfHeight * aspect, halfHeight * aspect,
+            halfHeight, -halfHeight
+        );
+    }
 }
