@@ -46,6 +46,15 @@ public class GameEntity {
         return geometry;
     }
 
+    public void setSelected(boolean selected) {
+        ColorRGBA color = selected
+            ? new ColorRGBA(0.5f, 0f, 0.5f, 1f)
+            : ColorRGBA.Blue;
+
+        geometry.getMaterial().setColor("Diffuse", color);
+        geometry.getMaterial().setColor("Ambient", color);
+    }
+
     public int getTileX() {
         return tileX;
     }

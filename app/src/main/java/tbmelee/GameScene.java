@@ -13,6 +13,7 @@ import java.util.List;
 public class GameScene {
     private final GameMap gameMap;
     private final List<GameEntity> units = new ArrayList<>();
+    private GameEntity selectedUnit;
 
     private final Node rootNode;
     private final AssetManager assetManager;
@@ -59,5 +60,21 @@ public class GameScene {
     public List<GameEntity> getUnits() {
         return List.copyOf(units);
     }
+
+    public GameEntity getSelectedUnit() {
+    return selectedUnit;
+}
+
+public void selectUnit(GameEntity unit) {
+    if (selectedUnit != null) {
+        selectedUnit.setSelected(false);
+    }
+
+    selectedUnit = unit;
+
+    if (selectedUnit != null) {
+        selectedUnit.setSelected(true);
+    }
+}
 
 }

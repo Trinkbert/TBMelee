@@ -36,12 +36,11 @@ public class App extends SimpleApplication {
         GameCamera gameCamera = new GameCamera(cam);
         gameCamera.setup();
 
-        GameControls gameControls = new GameControls(inputManager, gameCamera);
-        gameControls.register();
-
-
         GameScene scene = new GameScene(rootNode, assetManager);
         scene.build();
+
+        GameControls gameControls = new GameControls(inputManager, gameCamera, cam, scene);
+        gameControls.register();
 
     }
 
