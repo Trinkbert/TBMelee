@@ -62,19 +62,31 @@ public class GameScene {
     }
 
     public GameEntity getSelectedUnit() {
-    return selectedUnit;
+        return selectedUnit;
 }
 
-public void selectUnit(GameEntity unit) {
-    if (selectedUnit != null) {
-        selectedUnit.setSelected(false);
+    public void selectUnit(GameEntity unit) {
+        if (selectedUnit != null) {
+            selectedUnit.setSelected(false);
+        }
+
+        selectedUnit = unit;
+
+        if (selectedUnit != null) {
+            selectedUnit.setSelected(true);
+        }
     }
 
-    selectedUnit = unit;
+    public void moveSelectedUnit(int tileX, int tileZ) {
+        if (selectedUnit == null || !gameMap.isInsideMap(tileX, tileZ)) {
+            return;
+        }
 
-    if (selectedUnit != null) {
-        selectedUnit.setSelected(true);
+        Vector3f position = gameMap.tileToWorld(tileX, tileZ);
+        position.x += 0.5f;
+        position.z += 0.5f;
+
+        selectedUnit.moveTo(tileX, tileZ, position);
     }
-}
 
 }

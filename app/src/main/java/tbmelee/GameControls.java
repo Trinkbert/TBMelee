@@ -99,7 +99,35 @@ public class GameControls {
             }
         }
 
-        gameScene.selectUnit(closestUnit);
+        if (closestUnit != null) {
+            gameScene.selectUnit(closestUnit);
+            return;
+        }
+
+        moveSelectedUnitToGround(ray);
+    }
+
+    private void moveSelectedUnitToGround(Ray ray) {
+        if (gameScene.getSelectedUnit() == null) {
+            return;
+        }
+
+        Vector3f direction = ray.getDirection();
+        if (Math.abs(direction.y) < 0.0001f) {
+            return;
+        }
+
+        // The top of the ground plane is at y = 0.
+        float distance = -ray.getOrigin().y / direction.y;
+        if (distance < 0f) {
+            return;
+        }
+
+        Vector3f hit = ray.getOrigin().add(ray.getDirection().mult(distance));
+        int tileX = (int) Math.floor(hit.x);
+        int tileZ = (int) Math.floor(hit.z);
+
+        gameScene.moveSelectedUnit(tileX, tileZ);
     }
     
 }

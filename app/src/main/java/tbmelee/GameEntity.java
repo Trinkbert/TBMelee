@@ -4,6 +4,7 @@ package tbmelee;
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.shape.Box;
 
@@ -53,6 +54,12 @@ public class GameEntity {
 
         geometry.getMaterial().setColor("Diffuse", color);
         geometry.getMaterial().setColor("Ambient", color);
+    }
+
+    public void moveTo(int tileX, int tileZ, Vector3f position) {
+        this.tileX = tileX;
+        this.tileZ = tileZ;
+        geometry.setLocalTranslation(position);
     }
 
     public int getTileX() {
