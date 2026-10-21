@@ -16,6 +16,8 @@ public class GameEntity {
     private float height;
     private float depth;
 
+    private Geometry geometry;
+
     public GameEntity(int tileX, int tileZ,
                       float width, float height, float depth) {
         this.tileX = tileX;
@@ -27,21 +29,21 @@ public class GameEntity {
     }
 
     public Geometry createGeometry(AssetManager assetManager) {
-    Box box = new Box(width / 2f, height / 2f, depth / 2f);
-    Geometry geometry = new Geometry("GameEntity", box);
+        Box box = new Box(width / 2f, height / 2f, depth / 2f);
+        geometry = new Geometry("GameEntity", box);
 
-    Material material = new Material(
-        assetManager,
-        "Common/MatDefs/Light/Lighting.j3md"
-    );
+        Material material = new Material(
+            assetManager,
+            "Common/MatDefs/Light/Lighting.j3md"
+        );
 
-    material.setBoolean("UseMaterialColors", true);
-    material.setColor("Diffuse", ColorRGBA.Blue);
-    material.setColor("Ambient", ColorRGBA.Blue);
+        material.setBoolean("UseMaterialColors", true);
+        material.setColor("Diffuse", ColorRGBA.Blue);
+        material.setColor("Ambient", ColorRGBA.Blue);
 
-    geometry.setMaterial(material);
+        geometry.setMaterial(material);
 
-    return geometry;
+        return geometry;
     }
 
     public int getTileX() {
@@ -50,5 +52,9 @@ public class GameEntity {
 
     public int getTileZ() {
         return tileZ;
+    }
+
+    public Geometry getGeometry() {
+        return geometry;
     }
 }
