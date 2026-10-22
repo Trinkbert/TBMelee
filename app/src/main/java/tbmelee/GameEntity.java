@@ -61,6 +61,7 @@ public class GameEntity {
         geometry.getMaterial().setColor("Ambient", color);
     }
 
+    //Movement
     public void moveTo(int tileX, int tileZ, Vector3f position) {
         this.tileX = tileX;
         this.tileZ = tileZ;
@@ -76,6 +77,24 @@ public class GameEntity {
         geometry.setLocalTranslation(position);
     }
 
+    public void crouch() {
+        setStanding(false);
+    }
+
+    public void stand() {
+        setStanding(true);
+    }
+
+    private void setStanding(boolean standing) {
+        if (this.standing == standing) {
+            return;
+        }
+
+        this.standing = standing;
+        updateHeight();
+    }
+
+    // Getters and setters
     public int getTileX() {
         return tileX;
     }

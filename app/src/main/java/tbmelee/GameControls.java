@@ -11,6 +11,8 @@ import com.jme3.collision.CollisionResults;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
+import com.jme3.input.KeyInput;
+import com.jme3.input.controls.KeyTrigger;
 
 public class GameControls {
     private final InputManager inputManager;
@@ -44,6 +46,8 @@ public class GameControls {
             "Select",
             new MouseButtonTrigger(MouseInput.BUTTON_LEFT)
         );
+        inputManager.addMapping("Crouch", new KeyTrigger(KeyInput.KEY_C));
+        inputManager.addMapping("Stand", new KeyTrigger(KeyInput.KEY_S));
 
         inputManager.addListener((AnalogListener) (name, value, tpf) -> {
             if ("ZoomIn".equals(name)) {
@@ -73,6 +77,22 @@ public class GameControls {
             selectUnitUnderCursor();
             }
         }, "Select");
+        inputManager.addListener((ActionListener) (name, isPressed, tpf) -> {
+            if (!isPressed) {
+                return;
+            }
+
+            GameEntity selected = gameScene.getSelectedUnit();
+            if (selected == null) {
+                return;
+            }
+
+            if ("Crouch".equals(name)) {
+                selected.crouch();
+            } else if ("Stand".equals(name)) {
+                selected.stand();
+            }
+        }, "Crouch", "Stand");
     }
 
     private void selectUnitUnderCursor() {
