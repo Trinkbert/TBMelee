@@ -17,6 +17,10 @@ public class GameEntity {
     private float height;
     private float depth;
 
+    private static final float CROUCH_HEIGHT = 1f;
+    private static final float STAND_HEIGHT = 2f;
+    private boolean standing = true;
+
     private Geometry geometry;
 
     public GameEntity(int tileX, int tileZ,
@@ -43,6 +47,7 @@ public class GameEntity {
         material.setColor("Ambient", ColorRGBA.Blue);
 
         geometry.setMaterial(material);
+        updateHeight();
 
         return geometry;
     }
@@ -59,6 +64,15 @@ public class GameEntity {
     public void moveTo(int tileX, int tileZ, Vector3f position) {
         this.tileX = tileX;
         this.tileZ = tileZ;
+        geometry.setLocalTranslation(position.x, getHeight() / 2f, position.z);
+    }
+
+    private void updateHeight() {
+        float height = standing ? STAND_HEIGHT : CROUCH_HEIGHT;
+        geometry.setLocalScale(1f, height, 1f);
+
+        Vector3f position = geometry.getLocalTranslation();
+        position.y = height / 2f;
         geometry.setLocalTranslation(position);
     }
 
@@ -72,5 +86,9 @@ public class GameEntity {
 
     public Geometry getGeometry() {
         return geometry;
+    }
+
+    public int getHeight() {
+        return standing ? (int) STAND_HEIGHT : (int) CROUCH_HEIGHT;
     }
 }

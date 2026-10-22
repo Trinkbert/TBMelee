@@ -36,7 +36,7 @@ public class GameScene {
         Vector3f position = gameMap.tileToWorld(tileX, tileZ);
         geometry.setLocalTranslation(
             position.x + 0.5f,
-            position.y,
+            unit.getHeight() / 2f,
             position.z + 0.5f
         );
 
