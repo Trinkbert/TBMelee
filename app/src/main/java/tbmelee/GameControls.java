@@ -37,6 +37,10 @@ public class GameControls {
         inputManager.addMapping(
         "ZoomOut",
         new MouseAxisTrigger(MouseInput.AXIS_WHEEL, true)
+        );        
+        inputManager.addMapping(
+            "Orbit",
+            new MouseButtonTrigger(MouseInput.BUTTON_MIDDLE)
         );
         inputManager.addMapping("OrbitRight",
             new MouseAxisTrigger(MouseInput.AXIS_X, false));
@@ -63,36 +67,27 @@ public class GameControls {
         }, "ZoomIn", "ZoomOut", "OrbitRight", "OrbitLeft");
     
     
-        inputManager.addMapping(
-            "Orbit",
-            new MouseButtonTrigger(MouseInput.BUTTON_MIDDLE)
-        );
 
         inputManager.addListener((ActionListener) (name, isPressed, tpf) -> {
-            orbiting = isPressed;
-        }, "Orbit");
-
-        inputManager.addListener((ActionListener) (name, isPressed, tpf) -> {
-            if (isPressed) {
-            selectUnitUnderCursor();
+            switch (name) {
+                case "Orbit" -> orbiting = isPressed;
+                case "Select" -> {
+                    if (isPressed) {
+                        selectUnitUnderCursor();
+                    }
+                }
+                case "Crouch" -> {
+                    if (isPressed && gameScene.getSelectedUnit() != null) {
+                        gameScene.getSelectedUnit().crouch();
+                    }
+                }
+                case "Stand" -> {
+                    if (isPressed && gameScene.getSelectedUnit() != null) {
+                        gameScene.getSelectedUnit().stand();
+                    }
+                }
             }
-        }, "Select");
-        inputManager.addListener((ActionListener) (name, isPressed, tpf) -> {
-            if (!isPressed) {
-                return;
-            }
-
-            GameEntity selected = gameScene.getSelectedUnit();
-            if (selected == null) {
-                return;
-            }
-
-            if ("Crouch".equals(name)) {
-                selected.crouch();
-            } else if ("Stand".equals(name)) {
-                selected.stand();
-            }
-        }, "Crouch", "Stand");
+        }, "Orbit", "Select", "Crouch", "Stand");
     }
 
     private void selectUnitUnderCursor() {
