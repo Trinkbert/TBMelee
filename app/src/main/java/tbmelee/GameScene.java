@@ -24,7 +24,7 @@ public class GameScene {
         this.rootNode = rootNode;
         this.assetManager = assetManager;
         this.gameMap = new GameMap(rootNode, assetManager);
-        this.movementController = new UnitMovementController(gameMap);
+        this.movementController = new UnitMovementController(gameMap, rootNode, assetManager);
     }
 
     public GameEntity spawnUnit(int tileX, int tileZ) {
@@ -64,7 +64,7 @@ public class GameScene {
         if (selectedUnit != unit) {
             movementController.cancelPendingOrder();
         }
-        
+
         if (selectedUnit != null) {
             selectedUnit.setSelected(false);
         }
