@@ -61,6 +61,10 @@ public class GameScene {
 
 
     public void selectUnit(GameEntity unit) {
+        if (selectedUnit != unit) {
+            movementController.cancelPendingOrder();
+        }
+        
         if (selectedUnit != null) {
             selectedUnit.setSelected(false);
         }
@@ -69,10 +73,6 @@ public class GameScene {
 
         if (selectedUnit != null) {
             selectedUnit.setSelected(true);
-        }
-
-        if (selectedUnit != unit) {
-            movementController.cancelPendingOrder();
         }
     }
 
