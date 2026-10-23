@@ -142,7 +142,7 @@ public class GameControls {
         int tileX = (int) Math.floor(hit.x);
         int tileZ = (int) Math.floor(hit.z);
 
-        gameScene.moveSelectedUnit(tileX, tileZ);
+        gameScene.handleMoveClick(tileX, tileZ);
     }
     
 }

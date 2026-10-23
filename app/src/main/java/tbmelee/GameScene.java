@@ -12,6 +12,7 @@ import java.util.List;
 
 public class GameScene {
     private final GameMap gameMap;
+    private final UnitMovementController movementController;
     private final List<GameEntity> units = new ArrayList<>();
     private GameEntity selectedUnit;
 
@@ -23,6 +24,7 @@ public class GameScene {
         this.rootNode = rootNode;
         this.assetManager = assetManager;
         this.gameMap = new GameMap(rootNode, assetManager);
+        this.movementController = new UnitMovementController(gameMap);
     }
 
     public GameEntity spawnUnit(int tileX, int tileZ) {
@@ -57,13 +59,6 @@ public class GameScene {
         rootNode.addLight(ambient);
     }
 
-    public List<GameEntity> getUnits() {
-        return List.copyOf(units);
-    }
-
-    public GameEntity getSelectedUnit() {
-        return selectedUnit;
-}
 
     public void selectUnit(GameEntity unit) {
         if (selectedUnit != null) {
@@ -75,18 +70,22 @@ public class GameScene {
         if (selectedUnit != null) {
             selectedUnit.setSelected(true);
         }
-    }
 
-    public void moveSelectedUnit(int tileX, int tileZ) {
-        if (selectedUnit == null || !gameMap.isInsideMap(tileX, tileZ)) {
-            return;
+        if (selectedUnit != unit) {
+            movementController.cancelPendingOrder();
         }
-
-        Vector3f position = gameMap.tileToWorld(tileX, tileZ);
-        position.x += 0.5f;
-        position.z += 0.5f;
-
-        selectedUnit.moveTo(tileX, tileZ, position);
     }
 
+    public void handleMoveClick(int tileX, int tileZ) {
+        movementController.handleMoveClick(selectedUnit, tileX, tileZ);
+    }
+
+    // Getters
+    public List<GameEntity> getUnits() {
+        return List.copyOf(units);
+    }
+
+    public GameEntity getSelectedUnit() {
+        return selectedUnit;
+    }
 }
