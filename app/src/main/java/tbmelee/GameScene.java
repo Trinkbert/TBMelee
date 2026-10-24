@@ -80,6 +80,10 @@ public class GameScene {
         movementController.handleMoveClick(selectedUnit, tileX, tileZ);
     }
 
+    public void update(float tpf) {
+        movementController.update(tpf);
+    }
+
     // Getters
     public List<GameEntity> getUnits() {
         return List.copyOf(units);

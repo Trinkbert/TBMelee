@@ -6,6 +6,7 @@ import com.jme3.system.AppSettings;
 import com.jme3.math.ColorRGBA;
 
 public class App extends SimpleApplication {
+    private GameScene scene;
 
     public static void main(String[] args) {
         App app = new App();
@@ -36,12 +37,17 @@ public class App extends SimpleApplication {
         GameCamera gameCamera = new GameCamera(cam);
         gameCamera.setup();
 
-        GameScene scene = new GameScene(rootNode, assetManager);
+        scene = new GameScene(rootNode, assetManager);
         scene.build();
 
         GameControls gameControls = new GameControls(inputManager, gameCamera, cam, scene);
         gameControls.register();
 
+    }
+
+    @Override
+    public void simpleUpdate(float tpf) {
+        scene.update(tpf);
     }
 
 }

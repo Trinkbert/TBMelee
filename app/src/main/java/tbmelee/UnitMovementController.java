@@ -10,11 +10,17 @@ import com.jme3.scene.Node;
 import com.jme3.scene.shape.Box;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 public class UnitMovementController {
     private final Node previewNode;
     private final Material previewMaterial;
     private final GameMap gameMap;
+
+    private static final float MOVE_SPEED = 3f;
+    private final Deque<Tile> activePath = new ArrayDeque<>();
+    private GameEntity activeUnit;
 
     private final List<Tile> pendingPath = new ArrayList<>();
     private GameEntity pendingUnit;
@@ -60,7 +66,9 @@ public class UnitMovementController {
         destination.x += 0.5f;
         destination.z += 0.5f;
 
-        unit.moveTo(tileX, tileZ, destination);
+        activeUnit = unit;
+        activePath.clear();
+        activePath.addAll(pendingPath);
         cancelPendingOrder();
     }
 
@@ -99,6 +107,43 @@ public class UnitMovementController {
             marker.setMaterial(previewMaterial);
             marker.setLocalTranslation(tile.x() + 0.5f, 0.04f, tile.z() + 0.5f);
             previewNode.attachChild(marker);
+        }
+    }
+
+    public void update(float tpf) {
+        if (activeUnit == null || activePath.isEmpty()) {
+            return;
+        }
+
+        float distanceLeft = MOVE_SPEED * tpf;
+
+        while (distanceLeft > 0f && !activePath.isEmpty()) {
+            Tile next = activePath.peekFirst();
+            Vector3f target = gameMap.tileToWorld(next.x(), next.z());
+            target.x += 0.5f;
+            target.z += 0.5f;
+
+            Vector3f current = activeUnit.getGeometry().getLocalTranslation();
+            float dx = target.x - current.x;
+            float dz = target.z - current.z;
+            float segmentDistance = (float) Math.sqrt(dx * dx + dz * dz);
+
+            if (segmentDistance <= distanceLeft) {
+                activeUnit.moveTowards(
+                    next.x(), next.z(), target, distanceLeft
+                );
+                distanceLeft -= segmentDistance;
+                activePath.removeFirst();
+            } else {
+                activeUnit.moveTowards(
+                    next.x(), next.z(), target, distanceLeft
+                );
+                distanceLeft = 0f;
+            }
+        }
+
+        if (activePath.isEmpty()) {
+            activeUnit = null;
         }
     }
 }

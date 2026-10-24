@@ -68,6 +68,29 @@ public class GameEntity {
         geometry.setLocalTranslation(position.x, getHeight() / 2f, position.z);
     }
 
+    public boolean moveTowards(
+        int tileX, int tileZ, Vector3f target, float maxDistance) {
+        Vector3f current = geometry.getLocalTranslation();
+        float dx = target.x - current.x;
+        float dz = target.z - current.z;
+        float distance = (float) Math.sqrt(dx * dx + dz * dz);
+
+        if (distance <= maxDistance || distance == 0f) {
+            geometry.setLocalTranslation(target.x, getHeight() / 2f, target.z);
+            this.tileX = tileX;
+            this.tileZ = tileZ;
+            return true;
+        }
+
+        float fraction = maxDistance / distance;
+        geometry.setLocalTranslation(
+            current.x + dx * fraction,
+            getHeight() / 2f,
+            current.z + dz * fraction
+        );
+        return false;
+    }
+
     private void updateHeight() {
         float height = standing ? STAND_HEIGHT : CROUCH_HEIGHT;
         geometry.setLocalScale(1f, height, 1f);
