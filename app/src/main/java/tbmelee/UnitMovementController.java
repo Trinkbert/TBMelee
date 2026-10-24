@@ -123,7 +123,7 @@ public class UnitMovementController {
             target.x += 0.5f;
             target.z += 0.5f;
 
-            Vector3f current = activeUnit.getGeometry().getLocalTranslation();
+            Vector3f current = activeUnit.getUnitNode().getLocalTranslation();
             float dx = target.x - current.x;
             float dz = target.z - current.z;
             float segmentDistance = (float) Math.sqrt(dx * dx + dz * dz);

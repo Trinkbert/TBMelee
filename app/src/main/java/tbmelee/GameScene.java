@@ -33,16 +33,16 @@ public class GameScene {
         }
 
         GameEntity unit = new GameEntity(tileX, tileZ, 1f, 1f, 1f);
-        Geometry geometry = unit.createGeometry(assetManager);
+        Node unitNode = unit.createGeometry(assetManager);
 
         Vector3f position = gameMap.tileToWorld(tileX, tileZ);
-        geometry.setLocalTranslation(
+        unitNode.setLocalTranslation(
             position.x + 0.5f,
             unit.getHeight() / 2f,
             position.z + 0.5f
         );
 
-        rootNode.attachChild(geometry);
+        rootNode.attachChild(unitNode);
         units.add(unit);
         return unit;
     }
