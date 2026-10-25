@@ -7,6 +7,8 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.light.AmbientLight;
+import com.jme3.light.DirectionalLight;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +40,7 @@ public class GameScene {
         Vector3f position = gameMap.tileToWorld(tileX, tileZ);
         unitNode.setLocalTranslation(
             position.x + 0.5f,
-            unit.getHeight() / 2f,
+            0f,
             position.z + 0.5f
         );
 
@@ -57,6 +59,11 @@ public class GameScene {
         AmbientLight ambient = new AmbientLight();
         ambient.setColor(ColorRGBA.White);
         rootNode.addLight(ambient);
+
+        DirectionalLight sun = new DirectionalLight();
+        sun.setDirection(new Vector3f(-1f, -2f, -1f).normalizeLocal());
+        sun.setColor(ColorRGBA.White);
+        rootNode.addLight(sun);
     }
 
 

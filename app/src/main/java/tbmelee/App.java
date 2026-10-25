@@ -44,9 +44,6 @@ public class App extends SimpleApplication {
         GameControls gameControls = new GameControls(inputManager, gameCamera, cam, scene);
         gameControls.register();
 
-        Spatial character = assetManager.loadModel("Models/placeholder_guy.glb");
-            rootNode.attachChild(character);
-
     }
 
     @Override

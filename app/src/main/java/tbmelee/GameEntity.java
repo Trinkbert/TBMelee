@@ -2,6 +2,7 @@
 package tbmelee;
 
 import com.jme3.asset.AssetManager;
+import com.jme3.bounding.BoundingBox;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -12,6 +13,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.util.BufferUtils;
+import com.jme3.math.Quaternion;
 
 public class GameEntity {
 
@@ -31,6 +33,8 @@ public class GameEntity {
     private Geometry frameGeometry;
     private Material frameMaterial;
 
+    private Spatial model;
+
     public GameEntity(int tileX, int tileZ,
                       float width, float height, float depth) {
         this.tileX = tileX;
@@ -49,6 +53,37 @@ public class GameEntity {
 
         unitNode.attachChild(pickingGeometry);
         createFrame(assetManager);
+
+        model = assetManager.loadModel("Models/placeholder_guy.glb");
+        model.setName("UnitModel");
+        model.updateGeometricState();
+
+        // Set the model's scale and local position after checking its size and origin.
+        BoundingBox bounds = (BoundingBox) model.getWorldBound();
+
+        float modelWidth = bounds.getXExtent() * 2f;
+        float modelHeight = bounds.getYExtent() * 2f;
+        float modelDepth = bounds.getZExtent() * 2f;
+
+        float margin = 0.9f;
+        float modelScale = Math.min(
+            margin * width / modelWidth,
+            Math.min(
+                margin * STAND_HEIGHT / modelHeight,
+                margin * depth / modelDepth
+            )
+        );
+
+        Vector3f center = bounds.getCenter().clone();
+        Vector3f min = bounds.getMin(new Vector3f());
+
+        model.setLocalScale(modelScale);
+        model.setLocalTranslation(
+            -center.x * modelScale,
+            -min.y * modelScale,
+            -center.z * modelScale
+        );
+        unitNode.attachChild(model);
         updateHeight();
 
         return unitNode;
@@ -98,10 +133,6 @@ public class GameEntity {
     }
 
     public void setSelected(boolean selected) {
-        ColorRGBA color = selected
-            ? new ColorRGBA(0.5f, 0f, 0.5f, 1f)
-            : ColorRGBA.Blue;
-
         frameMaterial.setColor(
             "Color",
             selected ? new ColorRGBA(0.5f, 0f, 0.5f, 1f) : ColorRGBA.Blue
@@ -112,7 +143,7 @@ public class GameEntity {
     public void moveTo(int tileX, int tileZ, Vector3f position) {
         this.tileX = tileX;
         this.tileZ = tileZ;
-        unitNode.setLocalTranslation(position.x, getHeight() / 2f, position.z);
+        unitNode.setLocalTranslation(position.x, 0f, position.z);
     }
 
     public boolean moveTowards(
@@ -122,8 +153,15 @@ public class GameEntity {
         float dz = target.z - current.z;
         float distance = (float) Math.sqrt(dx * dx + dz * dz);
 
+        if (dx != 0f || dz != 0f) {
+            float yaw = (float) Math.atan2(dx, dz);
+            model.setLocalRotation(
+                new Quaternion().fromAngleAxis(yaw, Vector3f.UNIT_Y)
+            );
+        }
+
         if (distance <= maxDistance || distance == 0f) {
-            unitNode.setLocalTranslation(target.x, getHeight() / 2f, target.z);
+            unitNode.setLocalTranslation(target.x, 0f, target.z);
             this.tileX = tileX;
             this.tileZ = tileZ;
             return true;
@@ -132,19 +170,22 @@ public class GameEntity {
         float fraction = maxDistance / distance;
         unitNode.setLocalTranslation(
             current.x + dx * fraction,
-            getHeight() / 2f,
+            0f,
             current.z + dz * fraction
         );
         return false;
     }
 
     private void updateHeight() {
-        float height = standing ? STAND_HEIGHT : CROUCH_HEIGHT;
-        unitNode.setLocalScale(1f, height, 1f);
+        float verticalScale = getHeight();
+        float centerY = getHeight() / 2f;
+        unitNode.setLocalScale(1f, 1f, 1f);
 
-        Vector3f position = unitNode.getLocalTranslation();
-        position.y = height / 2f;
-        unitNode.setLocalTranslation(position);
+        frameGeometry.setLocalScale(1f, verticalScale, 1f);
+        frameGeometry.setLocalTranslation(0f, centerY, 0f);
+
+        pickingGeometry.setLocalScale(1f, verticalScale, 1f);
+        pickingGeometry.setLocalTranslation(0f, centerY, 0f);
     }
 
     public void crouch() {
