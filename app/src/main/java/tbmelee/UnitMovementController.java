@@ -66,9 +66,19 @@ public class UnitMovementController {
         destination.x += 0.5f;
         destination.z += 0.5f;
 
+        if (activeUnit != null && activeUnit != unit) {
+            activeUnit.setWalking(false);
+        }
+
         activeUnit = unit;
         activePath.clear();
         activePath.addAll(pendingPath);
+        if (activePath.isEmpty()) {
+            activeUnit = null;
+            cancelPendingOrder();
+            return;
+        }
+        activeUnit.setWalking(true);
         cancelPendingOrder();
     }
 
@@ -142,7 +152,8 @@ public class UnitMovementController {
             }
         }
 
-        if (activePath.isEmpty()) {
+        if (activePath.isEmpty()) {            
+            activeUnit.setWalking(false);
             activeUnit = null;
         }
     }

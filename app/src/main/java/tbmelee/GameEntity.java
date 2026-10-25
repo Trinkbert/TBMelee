@@ -14,6 +14,7 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.util.BufferUtils;
 import com.jme3.math.Quaternion;
+import com.jme3.anim.AnimComposer;
 
 public class GameEntity {
 
@@ -34,6 +35,8 @@ public class GameEntity {
     private Material frameMaterial;
 
     private Spatial model;
+    private AnimComposer animComposer;
+    private boolean walking;
 
     public GameEntity(int tileX, int tileZ,
                       float width, float height, float depth) {
@@ -54,7 +57,27 @@ public class GameEntity {
         unitNode.attachChild(pickingGeometry);
         createFrame(assetManager);
 
-        model = assetManager.loadModel("Models/placeholder_guy.glb");
+        model = assetManager.loadModel("Models/placeholder_guy1.glb");
+        animComposer = findAnimComposer(model);
+
+        //test
+        System.out.println(
+    "Composer found: " + (animComposer != null)
+);
+
+if (animComposer != null) {
+    System.out.println(
+        "Clips in placeholder_guy1.glb: "
+            + animComposer.getAnimClipsNames()
+    );
+}
+
+        if (animComposer == null || !animComposer.hasAnimClip("ArmatureAction")) {
+            throw new IllegalStateException(
+                "Model is missing AnimComposer or ArmatureAction"
+            );
+        }
+
         model.setName("UnitModel");
         model.updateGeometricState();
 
@@ -205,6 +228,25 @@ public class GameEntity {
         updateHeight();
     }
 
+
+    private AnimComposer findAnimComposer(Spatial spatial) {
+        AnimComposer composer = spatial.getControl(AnimComposer.class);
+        if (composer != null) {
+            return composer;
+        }
+
+        if (spatial instanceof Node node) {
+            for (Spatial child : node.getChildren()) {
+                composer = findAnimComposer(child);
+                if (composer != null) {
+                    return composer;
+                }
+            }
+        }
+
+        return null;
+    }
+
     // Getters and setters
     public int getTileX() {
         return tileX;
@@ -224,5 +266,19 @@ public class GameEntity {
 
     public int getHeight() {
         return standing ? (int) STAND_HEIGHT : (int) CROUCH_HEIGHT;
+    }
+
+    public void setWalking(boolean walking) {
+        if (this.walking == walking) {
+            return;
+        }
+
+        this.walking = walking;
+
+        if (walking) {
+            animComposer.setCurrentAction("ArmatureAction");
+        } else {
+            animComposer.setCurrentAction("Idle");
+        }
     }
 }
