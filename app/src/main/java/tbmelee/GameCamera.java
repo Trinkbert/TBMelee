@@ -7,6 +7,8 @@ import com.jme3.math.Vector3f;
 
 public class GameCamera {
 
+    private boolean orthographic = true;
+
     private final Vector3f target = new Vector3f(10f, -1f, 10f);
     private float azimuth;
     private float elevation;
@@ -67,6 +69,44 @@ public class GameCamera {
 
         azimuth -= deltaX * sensitivity;
 
+        float horizontalRadius = orbitRadius * FastMath.cos(elevation);
+        Vector3f location = target.add(
+            horizontalRadius * FastMath.sin(azimuth),
+            orbitRadius * FastMath.sin(elevation),
+            horizontalRadius * FastMath.cos(azimuth)
+        );
+
+        camera.setLocation(location);
+        camera.lookAt(target, Vector3f.UNIT_Y);
+    }
+
+    public void rotateQuarterTurn(float direction) {
+        azimuth += direction * FastMath.HALF_PI;
+        updateOrbitPosition();
+    }
+
+    public void toggleProjection() {
+        orthographic = !orthographic;
+
+        if (orthographic) {
+            camera.setParallelProjection(true);
+            updateFrustum();
+        } else {
+            camera.setParallelProjection(false);
+            camera.setFrustumPerspective(
+                45f,
+                (float) camera.getWidth() / camera.getHeight(),
+                1f,
+                1000f
+            );
+        }
+    }
+
+    public boolean isOrthographic() {
+        return orthographic;
+    }
+
+    private void updateOrbitPosition() {
         float horizontalRadius = orbitRadius * FastMath.cos(elevation);
         Vector3f location = target.add(
             horizontalRadius * FastMath.sin(azimuth),

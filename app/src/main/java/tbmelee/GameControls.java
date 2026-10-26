@@ -52,6 +52,9 @@ public class GameControls {
         );
         inputManager.addMapping("Crouch", new KeyTrigger(KeyInput.KEY_C));
         inputManager.addMapping("Stand", new KeyTrigger(KeyInput.KEY_S));
+        inputManager.addMapping("ToggleCameraMode", new KeyTrigger(KeyInput.KEY_TAB));
+        inputManager.addMapping("RotateClockwise", new KeyTrigger(KeyInput.KEY_E));
+        inputManager.addMapping("RotateCounterClockwise", new KeyTrigger(KeyInput.KEY_Q));
 
         inputManager.addListener((AnalogListener) (name, value, tpf) -> {
             if ("ZoomIn".equals(name)) {
@@ -70,7 +73,7 @@ public class GameControls {
 
         inputManager.addListener((ActionListener) (name, isPressed, tpf) -> {
             switch (name) {
-                case "Orbit" -> orbiting = isPressed;
+                case "Orbit" -> orbiting = isPressed && !gameCamera.isOrthographic();
                 case "Select" -> {
                     if (isPressed) {
                         selectUnitUnderCursor();
@@ -86,8 +89,23 @@ public class GameControls {
                         gameScene.getSelectedUnit().stand();
                     }
                 }
+                case "ToggleCameraMode" -> {
+                    if (isPressed) {
+                        gameCamera.toggleProjection();
+                    }
+                }
+                case "RotateCounterClockwise" -> {
+                    if (isPressed && gameCamera.isOrthographic()) {
+                        gameCamera.rotateQuarterTurn(-1f);
+                    }
+                }
+                case "RotateClockwise" -> {
+                    if (isPressed && gameCamera.isOrthographic()) {
+                        gameCamera.rotateQuarterTurn(1f);
+                    }
+}
             }
-        }, "Orbit", "Select", "Crouch", "Stand");
+        }, "Orbit", "Select", "Crouch", "Stand","ToggleCameraMode", "RotateCounterClockwise", "RotateClockwise");
     }
 
     private void selectUnitUnderCursor() {
