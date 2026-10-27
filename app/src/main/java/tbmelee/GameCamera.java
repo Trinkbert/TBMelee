@@ -7,6 +7,8 @@ import com.jme3.math.Vector3f;
 
 public class GameCamera {
 
+    private static final float PERSPECTIVE_FOV = 5f;
+
     private boolean orthographic = true;
 
     private final Vector3f target = new Vector3f(10f, -1f, 10f);
@@ -23,12 +25,6 @@ public class GameCamera {
     }
 
     public void setup() {
-        // Test different camera setups
-        /*
-         * camera.setParallelProjection(true);
-         * camera.setLocation(new Vector3f(22f, 16f, 22f));
-         * camera.lookAt(Vector3f.ZERO, Vector3f.UNIT_Y);
-         */
 
         //Vector3f target = new Vector3f(10f, -1f, 10f);
         camera.setLocation(target.add(22f, 22f, 22f));
@@ -45,17 +41,27 @@ public class GameCamera {
     }
 
     public void zoomIn() {
-    halfHeight = Math.max(3f, halfHeight - 1f);
-    updateFrustum();
+            halfHeight = Math.max(3f, halfHeight - 1f);
+        if (orthographic) {
+            updateFrustum();
+        } else {            
+            orbitRadius = perspectiveDistanceForZoom();
+            updateOrbitPosition();
+        }
     }
 
     public void zoomOut() {
-    halfHeight = Math.min(60f, halfHeight + 1f);
-    updateFrustum();
+            halfHeight = Math.min(60f, halfHeight + 1f);
+        if (orthographic) {
+            updateFrustum();
+        } else {
+            orbitRadius = perspectiveDistanceForZoom();
+            updateOrbitPosition();
+        }
     }
 
     private void updateFrustum() {
-    float aspect = (float) camera.getWidth() / camera.getHeight();
+        float aspect = (float) camera.getWidth() / camera.getHeight();
 
         camera.setFrustum(
             1f, 1000f,
@@ -64,20 +70,12 @@ public class GameCamera {
         );
     }
 
-    public void rotate(float deltaX, float deltaY) {
+    public void rotate(float deltaX) {
         float sensitivity = 1.5f;
 
         azimuth -= deltaX * sensitivity;
 
-        float horizontalRadius = orbitRadius * FastMath.cos(elevation);
-        Vector3f location = target.add(
-            horizontalRadius * FastMath.sin(azimuth),
-            orbitRadius * FastMath.sin(elevation),
-            horizontalRadius * FastMath.cos(azimuth)
-        );
-
-        camera.setLocation(location);
-        camera.lookAt(target, Vector3f.UNIT_Y);
+        updateOrbitPosition();
     }
 
     public void rotateQuarterTurn(float direction) {
@@ -89,16 +87,24 @@ public class GameCamera {
         orthographic = !orthographic;
 
         if (orthographic) {
+            halfHeight = orthographicHalfHeightForDistance();
+            float quarterTurn = FastMath.HALF_PI;
+            float snapOffset = quarterTurn / 2f;
+            azimuth = Math.round((azimuth - snapOffset)/ quarterTurn) * quarterTurn + snapOffset;
+
             camera.setParallelProjection(true);
             updateFrustum();
+            updateOrbitPosition();
         } else {
+            orbitRadius = perspectiveDistanceForZoom();
             camera.setParallelProjection(false);
             camera.setFrustumPerspective(
-                45f,
+                PERSPECTIVE_FOV,
                 (float) camera.getWidth() / camera.getHeight(),
                 1f,
                 1000f
             );
+            updateOrbitPosition();
         }
     }
 
@@ -116,5 +122,15 @@ public class GameCamera {
 
         camera.setLocation(location);
         camera.lookAt(target, Vector3f.UNIT_Y);
+    }
+
+    private float perspectiveDistanceForZoom() {
+        float halfFovRadians = PERSPECTIVE_FOV * FastMath.DEG_TO_RAD * 0.5f;
+        return halfHeight / FastMath.tan(halfFovRadians);
+    }
+
+    private float orthographicHalfHeightForDistance() {
+        float halfFovRadians = PERSPECTIVE_FOV * FastMath.DEG_TO_RAD * 0.5f;
+        return orbitRadius * FastMath.tan(halfFovRadians);
     }
 }

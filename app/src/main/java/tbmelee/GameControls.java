@@ -63,8 +63,8 @@ public class GameControls {
                 gameCamera.zoomOut();
             } else if (orbiting) {
                 switch (name) {
-                    case "OrbitRight" -> gameCamera.rotate(value, 0f);
-                    case "OrbitLeft"  -> gameCamera.rotate(-value, 0f);
+                    case "OrbitRight" -> gameCamera.rotate(value);
+                    case "OrbitLeft"  -> gameCamera.rotate(-value);
                 }
             }
         }, "ZoomIn", "ZoomOut", "OrbitRight", "OrbitLeft");
