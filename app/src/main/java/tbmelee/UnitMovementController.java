@@ -4,7 +4,6 @@ import com.jme3.math.Vector3f;
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Box;
@@ -12,25 +11,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashSet;
+import java.util.Set;
 
 public class UnitMovementController {
     private final Node previewNode;
     private final Material previewMaterial;
     private final GameMap gameMap;
+    private final GridPathfinder pathfinder;
 
     private static final float MOVE_SPEED = 3f;
     private final Deque<Tile> activePath = new ArrayDeque<>();
     private GameEntity activeUnit;
+    private final List<GameEntity> units;
 
     private final List<Tile> pendingPath = new ArrayList<>();
     private GameEntity pendingUnit;
     private int pendingTileX;
     private int pendingTileZ;
 
-    private record Tile(int x, int z) {}
-
-    public UnitMovementController(GameMap gameMap, Node rootNode, AssetManager assetManager) {
+    public UnitMovementController(GameMap gameMap, Node rootNode, AssetManager assetManager, List<GameEntity> units) {
         this.gameMap = gameMap;
+        this.pathfinder = new GridPathfinder(gameMap);
+        this.units = units;
 
         previewNode = new Node("MovePathPreview");
         rootNode.attachChild(previewNode);
@@ -89,21 +92,17 @@ public class UnitMovementController {
     }
 
     private List<Tile> buildPath(GameEntity unit, int destinationX, int destinationZ) {
-        List<Tile> path = new ArrayList<>();
-        int x = unit.getTileX();
-        int z = unit.getTileZ();
+        Tile start = new Tile(unit.getTileX(), unit.getTileZ());
+        Tile destination = new Tile(destinationX, destinationZ);
 
-        while (x != destinationX) {
-            x += Integer.compare(destinationX, x);
-            path.add(new Tile(x, z));
-        }
+            Set<Tile> blockedTiles = new HashSet<>();
+            for (GameEntity otherUnit : units) {
+                if (otherUnit != unit) {
+                    blockedTiles.add(new Tile(otherUnit.getTileX(), otherUnit.getTileZ()));
+                }
+            }
 
-        while (z != destinationZ) {
-            z += Integer.compare(destinationZ, z);
-            path.add(new Tile(x, z));
-        }
-
-        return path;
+        return pathfinder.findPath(start, destination, blockedTiles).tiles();
     }
 
     private void showPath(List<Tile> path) {

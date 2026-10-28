@@ -4,7 +4,6 @@ package tbmelee;
 import com.jme3.asset.AssetManager;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
@@ -26,7 +25,7 @@ public class GameScene {
         this.rootNode = rootNode;
         this.assetManager = assetManager;
         this.gameMap = new GameMap(rootNode, assetManager);
-        this.movementController = new UnitMovementController(gameMap, rootNode, assetManager);
+        this.movementController = new UnitMovementController(gameMap, rootNode, assetManager, units);
     }
 
     public GameEntity spawnUnit(int tileX, int tileZ) {
