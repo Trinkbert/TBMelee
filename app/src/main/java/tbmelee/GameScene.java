@@ -29,12 +29,14 @@ public class GameScene {
     }
 
     public GameEntity spawnUnit(int tileX, int tileZ) {
+        boolean useBlueTextures = units.isEmpty();
+
         if (!gameMap.isInsideMap(tileX, tileZ)) {
             throw new IllegalArgumentException("Unit position is outside the map");
         }
 
         GameEntity unit = new GameEntity(tileX, tileZ, 1f, 1f, 1f);
-        Node unitNode = unit.createGeometry(assetManager);
+        Node unitNode = unit.createGeometry(assetManager, useBlueTextures);
 
         Vector3f position = gameMap.tileToWorld(tileX, tileZ);
         unitNode.setLocalTranslation(

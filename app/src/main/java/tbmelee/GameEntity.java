@@ -15,6 +15,7 @@ import com.jme3.scene.VertexBuffer;
 import com.jme3.util.BufferUtils;
 import com.jme3.math.Quaternion;
 import com.jme3.anim.AnimComposer;
+import com.jme3.texture.Texture;
 
 public class GameEntity {
 
@@ -48,7 +49,7 @@ public class GameEntity {
         this.depth = depth;
     }
 
-    public Node createGeometry(AssetManager assetManager) {
+    public Node createGeometry(AssetManager assetManager, boolean useBlueTextures) {
         Box box = new Box(width / 2f, height / 2f, depth / 2f);
         pickingGeometry = new Geometry("UnitPickingBox", box);
 
@@ -58,6 +59,7 @@ public class GameEntity {
         createFrame(assetManager);
 
         model = assetManager.loadModel("Models/placeholder_guy1.glb");
+        applyTeamTextures(assetManager, useBlueTextures);
         animComposer = findAnimComposer(model);
 
         //test
@@ -245,6 +247,41 @@ if (animComposer != null) {
         }
 
         return null;
+    }
+
+    private void applyTeamTextures(AssetManager assetManager, boolean useBlueTextures) {
+        String torsoPath = useBlueTextures
+            ? "Textures/TorsoTextureBlue.png"
+            : "Textures/TorsoTextureGreen.png";
+        String armPath = useBlueTextures
+            ? "Textures/ArmTextureBlue.png"
+            : "Textures/ArmTextureGreen.png";
+
+        Texture torsoTexture = assetManager.loadTexture(torsoPath);
+        Texture armTexture = assetManager.loadTexture(armPath);
+
+        model.depthFirstTraversal(spatial -> {
+            if (!(spatial instanceof Geometry geometry)) {
+                return;
+            }
+
+            String texturePath = switch (geometry.getName()) {
+                case "Cube_0" -> torsoPath;
+                case "Cube.002_0", "Cube.003_0" -> armPath;
+                default -> null;
+            };
+
+            if (texturePath == null) {
+                return;
+            }
+
+            Material material = geometry.getMaterial().clone();
+            material.setTexture(
+                "BaseColorMap",
+                texturePath.equals(torsoPath) ? torsoTexture : armTexture
+            );
+            geometry.setMaterial(material);
+        });
     }
 
     // Getters and setters
