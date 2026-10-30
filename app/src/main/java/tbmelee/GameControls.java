@@ -120,6 +120,10 @@ public class GameControls {
         float closestDistance = Float.POSITIVE_INFINITY;
 
         for (GameEntity unit : gameScene.getUnits()) {
+                if (unit.isEnemy()) {
+                    continue;
+                }
+                
             CollisionResults collisions = new CollisionResults();
             unit.getGeometry().collideWith(ray, collisions);
 

@@ -28,15 +28,14 @@ public class GameScene {
         this.movementController = new UnitMovementController(gameMap, rootNode, assetManager, units);
     }
 
-    public GameEntity spawnUnit(int tileX, int tileZ) {
-        boolean useBlueTextures = units.isEmpty();
+    public GameEntity spawnUnit(int tileX, int tileZ, boolean isEnemy) {
 
         if (!gameMap.isInsideMap(tileX, tileZ)) {
             throw new IllegalArgumentException("Unit position is outside the map");
         }
 
-        GameEntity unit = new GameEntity(tileX, tileZ, 1f, 1f, 1f);
-        Node unitNode = unit.createGeometry(assetManager, useBlueTextures);
+        GameEntity unit = new GameEntity(tileX, tileZ, 1f, 1f, 1f, isEnemy);
+        Node unitNode = unit.createGeometry(assetManager, isEnemy);
 
         Vector3f position = gameMap.tileToWorld(tileX, tileZ);
         unitNode.setLocalTranslation(
@@ -53,8 +52,9 @@ public class GameScene {
     public void build() {
 
         gameMap.build();
-        spawnUnit(0, 0);
-        spawnUnit(3, 2);
+        spawnUnit(0, 0, false);
+        spawnUnit(3, 2, false);
+        spawnUnit(5, 5, true);
 
         // Light the scene
         AmbientLight ambient = new AmbientLight();

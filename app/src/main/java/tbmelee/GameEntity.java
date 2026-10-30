@@ -38,18 +38,20 @@ public class GameEntity {
     private Spatial model;
     private AnimComposer animComposer;
     private boolean walking;
+    private final boolean enemy;
 
     public GameEntity(int tileX, int tileZ,
-                      float width, float height, float depth) {
+                      float width, float height, float depth, boolean enemy) {
         this.tileX = tileX;
         this.tileZ = tileZ;
 
         this.width = width;
         this.height = height;
         this.depth = depth;
+        this.enemy = enemy;
     }
 
-    public Node createGeometry(AssetManager assetManager, boolean useBlueTextures) {
+    public Node createGeometry(AssetManager assetManager, boolean isEnemy) {
         Box box = new Box(width / 2f, height / 2f, depth / 2f);
         pickingGeometry = new Geometry("UnitPickingBox", box);
 
@@ -59,7 +61,9 @@ public class GameEntity {
         createFrame(assetManager);
 
         model = assetManager.loadModel("Models/placeholder_guy1.glb");
-        applyTeamTextures(assetManager, useBlueTextures);
+        if (!isEnemy) {
+            applyTeamTextures(assetManager);
+        }
         animComposer = findAnimComposer(model);
 
         //test
@@ -152,7 +156,7 @@ if (animComposer != null) {
             assetManager,
             "Common/MatDefs/Misc/Unshaded.j3md"
         );
-        frameMaterial.setColor("Color", ColorRGBA.Blue);
+        frameMaterial.setColor("Color", enemy ? ColorRGBA.Red : ColorRGBA.Blue);
         frameGeometry.setMaterial(frameMaterial);
         unitNode.attachChild(frameGeometry);
     }
@@ -249,17 +253,16 @@ if (animComposer != null) {
         return null;
     }
 
-    private void applyTeamTextures(AssetManager assetManager, boolean useBlueTextures) {
-        String torsoPath = useBlueTextures
-            ? "Textures/TorsoTextureBlue.png"
-            : "Textures/TorsoTextureGreen.png";
-        String armPath = useBlueTextures
-            ? "Textures/ArmTextureBlue.png"
-            : "Textures/ArmTextureGreen.png";
+    private void applyTeamTextures(AssetManager assetManager) {
+    
+        String torsoPath = "Textures/TorsoTextureGreen.png"
+            ;
+        String armPath = "Textures/ArmTextureGreen.png";
+        
 
         Texture torsoTexture = assetManager.loadTexture(torsoPath);
         Texture armTexture = assetManager.loadTexture(armPath);
-
+        
         model.depthFirstTraversal(spatial -> {
             if (!(spatial instanceof Geometry geometry)) {
                 return;
@@ -282,6 +285,7 @@ if (animComposer != null) {
             );
             geometry.setMaterial(material);
         });
+       
     }
 
     // Getters and setters
@@ -303,6 +307,10 @@ if (animComposer != null) {
 
     public int getHeight() {
         return standing ? (int) STAND_HEIGHT : (int) CROUCH_HEIGHT;
+    }
+
+    public boolean isEnemy() {
+        return enemy;
     }
 
     public void setWalking(boolean walking) {
