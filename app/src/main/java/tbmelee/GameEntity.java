@@ -15,8 +15,6 @@ import com.jme3.scene.VertexBuffer;
 import com.jme3.util.BufferUtils;
 import com.jme3.math.Quaternion;
 import com.jme3.anim.AnimComposer;
-import com.jme3.texture.Texture;
-import com.jme3.anim.SkinningControl;
 
 public class GameEntity {
 
@@ -62,11 +60,7 @@ public class GameEntity {
         unitNode.attachChild(pickingGeometry);
         createFrame(assetManager);
 
-        model = assetManager.loadModel("Models/placeholder_guy1.glb");
-        //WeaponModel
-        if (!isEnemy) {
-            applyTeamTextures(assetManager);
-        }
+        model = new ModelLoader().loadModel(assetManager, isEnemy);
         animComposer = findAnimComposer(model);
 
         //test
@@ -116,7 +110,6 @@ if (animComposer != null) {
             -center.z * modelScale
         );
         unitNode.attachChild(model);
-        //attachClub(assetManager);
         updateHeight();
 
         return unitNode;
@@ -255,70 +248,6 @@ if (animComposer != null) {
         }
 
         return null;
-    }
-
-    private SkinningControl findSkinningControl(Spatial spatial) {
-        SkinningControl control = spatial.getControl(SkinningControl.class);
-        if (control != null) {
-            return control;
-        }
-
-        if (spatial instanceof Node node) {
-            for (Spatial child : node.getChildren()) {
-                control = findSkinningControl(child);
-                if (control != null) {
-                    return control;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    private void applyTeamTextures(AssetManager assetManager) {
-    
-        String torsoPath = "Textures/TorsoTextureGreen.png"
-            ;
-        String armPath = "Textures/ArmTextureGreen.png";
-        
-
-        Texture torsoTexture = assetManager.loadTexture(torsoPath);
-        Texture armTexture = assetManager.loadTexture(armPath);
-        
-        model.depthFirstTraversal(spatial -> {
-            if (!(spatial instanceof Geometry geometry)) {
-                return;
-            }
-
-            String texturePath = switch (geometry.getName()) {
-                case "Cube_0" -> torsoPath;
-                case "Cube.002_0", "Cube.003_0" -> armPath;
-                default -> null;
-            };
-
-            if (texturePath == null) {
-                return;
-            }
-
-            Material material = geometry.getMaterial().clone();
-            material.setTexture(
-                "BaseColorMap",
-                texturePath.equals(torsoPath) ? torsoTexture : armTexture
-            );
-            geometry.setMaterial(material);
-        });
-       
-    }
-
-    private void attachClub(AssetManager assetManager) {
-        SkinningControl skinningControl = findSkinningControl(model);
-        if (skinningControl == null) {
-            throw new IllegalStateException("Model is missing SkinningControl");
-        }
-
-        Node handNode = skinningControl.getAttachmentsNode("Arm.R");
-        Spatial club = assetManager.loadModel("Models/weapon_placeholder.glb");
-        handNode.attachChild(club);
     }
 
     // Getters and setters
