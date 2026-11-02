@@ -4,6 +4,7 @@ import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -25,29 +26,14 @@ public class ModelLoader {
             applyTeamTextures(assetManager, model);
         }
 
-        Spatial weapon = assetManager.loadModel("Models/weapon_placeholder.glb");
-        Spatial shield = assetManager.loadModel("Models/shield_placeholder.glb");
-        //Reposition the weapon
-        weapon.setLocalScale(1f);
-        weapon.setLocalTranslation(0f, 1.5f, 1f);
-        weapon.setLocalRotation(new Quaternion());
-        weapon.setLocalRotation(new Quaternion().fromAngles(
-            FastMath.DEG_TO_RAD * 90,
-            FastMath.DEG_TO_RAD * 0,
-            FastMath.DEG_TO_RAD * 0
-        ));
-        //Reposition the shield
-        shield.setLocalScale(1f);
-        shield.setLocalTranslation(0.65f, 1.5f, 0f);
-        shield.setLocalRotation(new Quaternion());
-        shield.setLocalRotation(new Quaternion().fromAngles(
-            FastMath.DEG_TO_RAD * 90,
-            FastMath.DEG_TO_RAD * 0,
-            FastMath.DEG_TO_RAD * 0
-        ));
-
-        rightArm.attachChild(weapon);
-        leftArm.attachChild(shield);
+        loadAndAttach(
+            assetManager, rightArm, "Models/weapon_placeholder.glb",
+            new Vector3f(0f, 1.5f, 1f)
+        );
+        loadAndAttach(
+            assetManager, leftArm, "Models/shield_placeholder.glb",
+            new Vector3f(0.65f, 1.5f, 0f)
+        );
 
         return model;
     }
@@ -85,6 +71,20 @@ public class ModelLoader {
             geometry.setMaterial(material);
         });
        
+    }
+
+    private void loadAndAttach(
+            AssetManager assetManager,
+            Node attachmentNode,
+            String modelPath,
+            Vector3f translation) {
+        Spatial equipment = assetManager.loadModel(modelPath);
+        equipment.setLocalScale(1f);
+        equipment.setLocalTranslation(translation);
+        equipment.setLocalRotation(
+            new Quaternion().fromAngles(FastMath.HALF_PI, 0f, 0f)
+        );
+        attachmentNode.attachChild(equipment);
     }
 
     private Node findNode(Spatial spatial, String name) {
