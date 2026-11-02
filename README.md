@@ -14,13 +14,13 @@ Build System: Gradle
 
 Development Environment: Visual Studio Code
 
+3D Assets: Blender
+
 ## Requirements
 
 JDK 21
 
 Git
-
-Internet access for the initial Gradle dependency download
 
 ## Run the application
 
