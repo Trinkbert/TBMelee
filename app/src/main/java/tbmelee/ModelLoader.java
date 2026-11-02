@@ -14,6 +14,7 @@ public class ModelLoader {
     public Spatial loadModel(AssetManager assetManager, boolean isEnemy) {
         Spatial model = assetManager.loadModel("Models/placeholder_guy1.glb");
         Node rightArm = findNode(model, "Arm.R");
+        Node leftArm = findNode(model, "Arm.L");
 
         if (rightArm == null) {
             throw new IllegalStateException(
@@ -25,6 +26,7 @@ public class ModelLoader {
         }
 
         Spatial weapon = assetManager.loadModel("Models/weapon_placeholder.glb");
+        Spatial shield = assetManager.loadModel("Models/shield_placeholder.glb");
         //Reposition the weapon
         weapon.setLocalScale(1f);
         weapon.setLocalTranslation(0f, 1.5f, 1f);
@@ -34,8 +36,18 @@ public class ModelLoader {
             FastMath.DEG_TO_RAD * 0,
             FastMath.DEG_TO_RAD * 0
         ));
+        //Reposition the shield
+        shield.setLocalScale(1f);
+        shield.setLocalTranslation(0.65f, 1.5f, 0f);
+        shield.setLocalRotation(new Quaternion());
+        shield.setLocalRotation(new Quaternion().fromAngles(
+            FastMath.DEG_TO_RAD * 90,
+            FastMath.DEG_TO_RAD * 0,
+            FastMath.DEG_TO_RAD * 0
+        ));
 
         rightArm.attachChild(weapon);
+        leftArm.attachChild(shield);
 
         return model;
     }

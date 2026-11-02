@@ -63,17 +63,12 @@ public class GameEntity {
         model = new ModelLoader().loadModel(assetManager, isEnemy);
         animComposer = findAnimComposer(model);
 
-        //test
-        System.out.println(
-    "Composer found: " + (animComposer != null)
-);
-
-if (animComposer != null) {
-    System.out.println(
-        "Clips in placeholder_guy1.glb: "
-            + animComposer.getAnimClipsNames()
-    );
-}
+        if (animComposer != null) {
+            System.out.println(
+                "Clips in placeholder_guy1.glb: "
+                    + animComposer.getAnimClipsNames()
+            );
+        }
 
         if (animComposer == null || !animComposer.hasAnimClip("ArmatureAction")) {
             throw new IllegalStateException(
