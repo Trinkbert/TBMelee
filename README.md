@@ -26,9 +26,12 @@ Git
 
 ### Clone the repository:
 
+```shell
 git clone https://github.com/Trinkbert/TBMelee
-
+```
+```shell
 cd TBMelee
+```
 
 ### On Windows, run:
 
