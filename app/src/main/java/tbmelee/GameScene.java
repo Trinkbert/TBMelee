@@ -16,6 +16,8 @@ public class GameScene {
     private final UnitMovementController movementController;
     private final List<GameEntity> units = new ArrayList<>();
     private GameEntity selectedUnit;
+    private GameEntity pendingAttackUnit;
+    private GameEntity pendingAttackTarget;
 
     private final Node rootNode;
     private final AssetManager assetManager;
@@ -84,13 +86,48 @@ public class GameScene {
         }
     }
 
-    public void handleMoveClick(int tileX, int tileZ) {
-        movementController.handleMoveClick(selectedUnit, tileX, tileZ);
+    public void update(float tpf) {
+        GameEntity completedUnit = movementController.update(tpf);
+
+        if (completedUnit != null && completedUnit == pendingAttackUnit) {
+            GameEntity target = pendingAttackTarget;
+            pendingAttackUnit = null;
+            pendingAttackTarget = null;
+            handleAttackClick(target);
+        }
     }
 
-    public void update(float tpf) {
-        movementController.update(tpf);
-    }
+        public void handleMoveClick(int tileX, int tileZ) {
+            pendingAttackUnit = null;
+            pendingAttackTarget = null;
+            movementController.handleOrderClick(selectedUnit, tileX, tileZ);
+        }
+
+        public void handleAttackClick(GameEntity target) {
+            if (selectedUnit == null || target == null) {
+                return;
+            }
+
+            int distanceX = Math.abs(selectedUnit.getTileX() - target.getTileX());
+            int distanceZ = Math.abs(selectedUnit.getTileZ() - target.getTileZ());
+            int distance = Math.max(distanceX, distanceZ);
+
+            if (distance <= selectedUnit.getWeaponReach()) {
+                selectedUnit.faceTowards(target);
+                target.applyDamage(selectedUnit.getDamageOutput());
+                pendingAttackUnit = null;
+                pendingAttackTarget = null;
+                return;
+            }
+
+            pendingAttackUnit = selectedUnit;
+            pendingAttackTarget = target;
+            movementController.handleOrderClick(
+                selectedUnit,
+                target.getTileX(),
+                target.getTileZ()
+            );
+        }
 
     // Getters
     public List<GameEntity> getUnits() {

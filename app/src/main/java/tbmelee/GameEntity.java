@@ -38,6 +38,11 @@ public class GameEntity {
     private AnimComposer animComposer;
     private boolean walking;
     private final boolean enemy;
+
+    //Combat
+    private int hitPoints = 1;
+    private int damageOutput = 1;
+    private int weaponReach = 1;
     
 
     public GameEntity(int tileX, int tileZ,
@@ -226,6 +231,21 @@ public class GameEntity {
         updateHeight();
     }
 
+    public void faceTowards(GameEntity target) {
+        Vector3f from = unitNode.getLocalTranslation();
+        Vector3f to = target.getUnitNode().getLocalTranslation();
+
+        float dx = to.x - from.x;
+        float dz = to.z - from.z;
+
+        if (dx != 0f || dz != 0f) {
+            float yaw = (float) Math.atan2(dx, dz);
+            model.setLocalRotation(
+                new Quaternion().fromAngleAxis(yaw, Vector3f.UNIT_Y)
+            );
+        }
+    }
+
 
     private AnimComposer findAnimComposer(Spatial spatial) {
         AnimComposer composer = spatial.getControl(AnimComposer.class);
@@ -243,6 +263,12 @@ public class GameEntity {
         }
 
         return null;
+    }
+
+    //Combat
+    public void applyDamage(int damage) {
+        hitPoints -= damage;
+        System.out.println("Unit Hitpoints: " + hitPoints);
     }
 
     // Getters and setters
@@ -268,6 +294,18 @@ public class GameEntity {
 
     public boolean isEnemy() {
         return enemy;
+    }
+
+    public int getHitPoints() {
+        return hitPoints;
+    }
+
+    public int getDamageOutput() {
+        return damageOutput;
+    }
+
+    public int getWeaponReach() {
+        return weaponReach;
     }
 
     public void setWalking(boolean walking) {

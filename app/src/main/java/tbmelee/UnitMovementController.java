@@ -45,7 +45,7 @@ public class UnitMovementController {
         previewMaterial.setColor("Color", ColorRGBA.Yellow);
     }
 
-    public void handleMoveClick(GameEntity unit, int tileX, int tileZ) {
+    public void handleOrderClick(GameEntity unit, int tileX, int tileZ) {
         if (unit == null || !gameMap.isInsideMap(tileX, tileZ)) {
             return;
         }
@@ -119,9 +119,9 @@ public class UnitMovementController {
         }
     }
 
-    public void update(float tpf) {
+    public GameEntity update(float tpf) {
         if (activeUnit == null || activePath.isEmpty()) {
-            return;
+            return null;
         }
 
         float distanceLeft = MOVE_SPEED * tpf;
@@ -153,7 +153,11 @@ public class UnitMovementController {
 
         if (activePath.isEmpty()) {            
             activeUnit.setWalking(false);
+            GameEntity completedUnit = activeUnit;
             activeUnit = null;
+            return completedUnit;
         }
+        return null;
     }
+
 }

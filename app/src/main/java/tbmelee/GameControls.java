@@ -120,9 +120,6 @@ public class GameControls {
         float closestDistance = Float.POSITIVE_INFINITY;
 
         for (GameEntity unit : gameScene.getUnits()) {
-                if (unit.isEnemy()) {
-                    continue;
-                }
                 
             CollisionResults collisions = new CollisionResults();
             unit.getGeometry().collideWith(ray, collisions);
@@ -135,13 +132,19 @@ public class GameControls {
                 }
             }
         }
-
-        if (closestUnit != null) {
-            gameScene.selectUnit(closestUnit);
+        if (closestUnit == null) {
+            moveSelectedUnitToGround(ray);
             return;
         }
 
-        moveSelectedUnitToGround(ray);
+        if (closestUnit.isEnemy()) {
+            if (gameScene.getSelectedUnit() != null) {
+                gameScene.handleAttackClick(closestUnit);
+            }
+            return;
+        }
+
+gameScene.selectUnit(closestUnit);
     }
 
     private void moveSelectedUnitToGround(Ray ray) {
