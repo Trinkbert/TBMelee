@@ -15,6 +15,7 @@ public class GameScene {
     private final GameMap gameMap;
     private final UnitMovementController movementController;
     private final List<GameEntity> units = new ArrayList<>();
+    private final List<GameEntity> enemies = new ArrayList<>();
     private GameEntity selectedUnit;
     private GameEntity pendingAttackUnit;
     private GameEntity pendingAttackTarget;
@@ -27,7 +28,7 @@ public class GameScene {
         this.rootNode = rootNode;
         this.assetManager = assetManager;
         this.gameMap = new GameMap(rootNode, assetManager);
-        this.movementController = new UnitMovementController(gameMap, rootNode, assetManager, units);
+        this.movementController = new UnitMovementController(gameMap, rootNode, assetManager, units, enemies);
     }
 
     public GameEntity spawnUnit(int tileX, int tileZ, boolean isEnemy) {
@@ -47,16 +48,24 @@ public class GameScene {
         );
 
         rootNode.attachChild(unitNode);
-        units.add(unit);
+        if (isEnemy) {
+            enemies.add(unit);
+        } else {
+            units.add(unit);
+        }
         return unit;
     }
 
     public void build() {
 
+        //List of Units
         gameMap.build();
-        spawnUnit(0, 0, false);
-        spawnUnit(3, 2, false);
-        spawnUnit(5, 5, true);
+        spawnUnit(9, 0, false);
+        spawnUnit(11, 0, false);
+        spawnUnit(9, 9, true);
+        spawnUnit(9, 11, true);
+        spawnUnit(11, 9, true);
+        spawnUnit(11, 11, true);
 
         // Light the scene
         AmbientLight ambient = new AmbientLight();
@@ -95,43 +104,62 @@ public class GameScene {
             pendingAttackTarget = null;
             handleAttackClick(target);
         }
+
+        removeEnemy();
+
     }
 
-        public void handleMoveClick(int tileX, int tileZ) {
+        
+    
+
+    public void handleMoveClick(int tileX, int tileZ) {
+        pendingAttackUnit = null;
+        pendingAttackTarget = null;
+        movementController.handleOrderClick(selectedUnit, tileX, tileZ);
+    }
+
+    public void handleAttackClick(GameEntity target) {
+        if (selectedUnit == null || target == null) {
+            return;
+        }
+
+        int distanceX = Math.abs(selectedUnit.getTileX() - target.getTileX());
+        int distanceZ = Math.abs(selectedUnit.getTileZ() - target.getTileZ());
+        int distance = Math.max(distanceX, distanceZ);
+
+        if (distance <= selectedUnit.getWeaponReach()) {
+            selectedUnit.faceTowards(target);
+            selectedUnit.playAttackAnimation(target);
             pendingAttackUnit = null;
             pendingAttackTarget = null;
-            movementController.handleOrderClick(selectedUnit, tileX, tileZ);
+            return;
         }
 
-        public void handleAttackClick(GameEntity target) {
-            if (selectedUnit == null || target == null) {
-                return;
+        pendingAttackUnit = selectedUnit;
+        pendingAttackTarget = target;
+        movementController.handleOrderClick(
+            selectedUnit,
+            target.getTileX(),
+            target.getTileZ()
+        );
+    }
+
+    private void removeEnemy() {
+        for (GameEntity enemy : List.copyOf(enemies)) {
+            if (enemy.getHitPoints() <= 0) {
+                enemies.remove(enemy);
+                rootNode.detachChild(enemy.getUnitNode());
             }
-
-            int distanceX = Math.abs(selectedUnit.getTileX() - target.getTileX());
-            int distanceZ = Math.abs(selectedUnit.getTileZ() - target.getTileZ());
-            int distance = Math.max(distanceX, distanceZ);
-
-            if (distance <= selectedUnit.getWeaponReach()) {
-                selectedUnit.faceTowards(target);
-                target.applyDamage(selectedUnit.getDamageOutput());
-                pendingAttackUnit = null;
-                pendingAttackTarget = null;
-                return;
-            }
-
-            pendingAttackUnit = selectedUnit;
-            pendingAttackTarget = target;
-            movementController.handleOrderClick(
-                selectedUnit,
-                target.getTileX(),
-                target.getTileZ()
-            );
         }
+    }
 
     // Getters
     public List<GameEntity> getUnits() {
         return List.copyOf(units);
+    }
+
+    public List<GameEntity> getEnemies() {
+        return List.copyOf(enemies);
     }
 
     public GameEntity getSelectedUnit() {

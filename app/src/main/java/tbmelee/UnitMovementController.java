@@ -24,16 +24,18 @@ public class UnitMovementController {
     private final Deque<Tile> activePath = new ArrayDeque<>();
     private GameEntity activeUnit;
     private final List<GameEntity> units;
+    private final List<GameEntity> enemies;
 
     private final List<Tile> pendingPath = new ArrayList<>();
     private GameEntity pendingUnit;
     private int pendingTileX;
     private int pendingTileZ;
 
-    public UnitMovementController(GameMap gameMap, Node rootNode, AssetManager assetManager, List<GameEntity> units) {
+    public UnitMovementController(GameMap gameMap, Node rootNode, AssetManager assetManager, List<GameEntity> units, List<GameEntity> enemies) {
         this.gameMap = gameMap;
         this.pathfinder = new GridPathfinder(gameMap);
         this.units = units;
+        this.enemies = enemies;
 
         previewNode = new Node("MovePathPreview");
         rootNode.attachChild(previewNode);
@@ -96,13 +98,18 @@ public class UnitMovementController {
         Tile destination = new Tile(destinationX, destinationZ);
 
             Set<Tile> blockedTiles = new HashSet<>();
-            for (GameEntity otherUnit : units) {
-                if (otherUnit != unit) {
-                    blockedTiles.add(new Tile(otherUnit.getTileX(), otherUnit.getTileZ()));
-                }
-            }
+            addBlockedTiles(blockedTiles, units, unit);
+            addBlockedTiles(blockedTiles, enemies, unit);
 
         return pathfinder.findPath(start, destination, blockedTiles).tiles();
+    }
+
+    private void addBlockedTiles(Set<Tile> blockedTiles, List<GameEntity> entities, GameEntity movingUnit) {
+        for (GameEntity entity : entities) {
+            if (entity != movingUnit) {
+                blockedTiles.add(new Tile(entity.getTileX(), entity.getTileZ()));
+            }
+        }
     }
 
     private void showPath(List<Tile> path) {

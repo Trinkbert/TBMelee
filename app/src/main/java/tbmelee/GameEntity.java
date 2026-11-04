@@ -15,6 +15,7 @@ import com.jme3.scene.VertexBuffer;
 import com.jme3.util.BufferUtils;
 import com.jme3.math.Quaternion;
 import com.jme3.anim.AnimComposer;
+import com.jme3.anim.tween.Tweens;
 
 public class GameEntity {
 
@@ -43,6 +44,7 @@ public class GameEntity {
     private int hitPoints = 1;
     private int damageOutput = 1;
     private int weaponReach = 1;
+    private GameEntity attackTarget;
     
 
     public GameEntity(int tileX, int tileZ,
@@ -68,6 +70,7 @@ public class GameEntity {
         model = new ModelLoader().loadModel(assetManager, isEnemy);
         animComposer = findAnimComposer(model);
 
+        //Manual check to console
         if (animComposer != null) {
             System.out.println(
                 "Clips in placeholder_guy1.glb: "
@@ -75,11 +78,22 @@ public class GameEntity {
             );
         }
 
+        //Check animation clips
         if (animComposer == null || !animComposer.hasAnimClip("ArmatureAction")) {
             throw new IllegalStateException(
                 "Model is missing AnimComposer or ArmatureAction"
             );
         }
+
+        if (!animComposer.hasAnimClip("Attack")) {
+            throw new IllegalStateException("Model is missing Attack animation");
+        }
+
+        animComposer.actionSequence(
+            "AttackLoop",
+            animComposer.action("Attack"),
+            Tweens.callMethod(this, "applyAttackDamage")
+        );
 
         model.setName("UnitModel");
         model.updateGeometricState();
@@ -269,6 +283,25 @@ public class GameEntity {
     public void applyDamage(int damage) {
         hitPoints -= damage;
         System.out.println("Unit Hitpoints: " + hitPoints);
+    }
+
+    public void playAttackAnimation(GameEntity target) {
+        attackTarget = target;
+        animComposer.setCurrentAction(
+            "AttackLoop",
+            AnimComposer.DEFAULT_LAYER,
+            false
+        );
+    }
+
+    public void applyAttackDamage() {
+        if (attackTarget == null) {
+            return;
+        }
+
+        attackTarget.applyDamage(damageOutput);
+        attackTarget = null;
+        animComposer.setCurrentAction("Idle");
     }
 
     // Getters and setters

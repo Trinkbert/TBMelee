@@ -1,5 +1,6 @@
 package tbmelee;
 
+import java.util.stream.Stream;
 import com.jme3.input.InputManager;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.AnalogListener;
@@ -119,7 +120,9 @@ public class GameControls {
         GameEntity closestUnit = null;
         float closestDistance = Float.POSITIVE_INFINITY;
 
-        for (GameEntity unit : gameScene.getUnits()) {
+        for (GameEntity unit : Stream.concat(
+                gameScene.getUnits().stream(),
+                gameScene.getEnemies().stream()).toList()) {
                 
             CollisionResults collisions = new CollisionResults();
             unit.getGeometry().collideWith(ray, collisions);
