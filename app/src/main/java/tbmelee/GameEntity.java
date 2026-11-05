@@ -2,20 +2,10 @@
 package tbmelee;
 
 import com.jme3.asset.AssetManager;
-import com.jme3.bounding.BoundingBox;
-import com.jme3.material.Material;
-import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
-import com.jme3.scene.shape.Box;
-import com.jme3.scene.Spatial;
-import com.jme3.scene.Mesh;
-import com.jme3.scene.VertexBuffer;
-import com.jme3.util.BufferUtils;
-import com.jme3.math.Quaternion;
 import com.jme3.anim.AnimComposer;
-import com.jme3.anim.tween.Tweens;
 
 public class GameEntity {
 
@@ -25,20 +15,16 @@ public class GameEntity {
     private float width;
     private float height;
     private float depth;
+    
+    private final boolean enemy;
 
+    //Stance
     private static final float CROUCH_HEIGHT = 1f;
     private static final float STAND_HEIGHT = 2f;
     private boolean standing = true;
 
-    private final Node unitNode = new Node("Unit");
-    private Geometry pickingGeometry;
-    private Geometry frameGeometry;
-    private Material frameMaterial;
-
-    private Spatial model;
+    private UnitVisual visual;
     private AnimComposer animComposer;
-    private boolean walking;
-    private final boolean enemy;
 
     //Combat
     private int hitPoints = 1;
@@ -59,173 +45,47 @@ public class GameEntity {
     }
 
     public Node createGeometry(AssetManager assetManager, boolean isEnemy) {
-        Box box = new Box(width / 2f, height / 2f, depth / 2f);
-        pickingGeometry = new Geometry("UnitPickingBox", box);
-
-        pickingGeometry.setCullHint(Spatial.CullHint.Always);
-
-        unitNode.attachChild(pickingGeometry);
-        createFrame(assetManager);
-
-        model = new ModelLoader().loadModel(assetManager, isEnemy);
-        animComposer = findAnimComposer(model);
-
-        //Manual check to console
-        if (animComposer != null) {
-            System.out.println(
-                "Clips in placeholder_guy1.glb: "
-                    + animComposer.getAnimClipsNames()
-            );
-        }
-
-        //Check animation clips
-        if (animComposer == null || !animComposer.hasAnimClip("ArmatureAction")) {
-            throw new IllegalStateException(
-                "Model is missing AnimComposer or ArmatureAction"
-            );
-        }
-
-        if (!animComposer.hasAnimClip("Attack")) {
-            throw new IllegalStateException("Model is missing Attack animation");
-        }
-
-        animComposer.actionSequence(
-            "AttackLoop",
-            animComposer.action("Attack"),
-            Tweens.callMethod(this, "applyAttackDamage")
-        );
-
-        model.setName("UnitModel");
-        model.updateGeometricState();
-
-        // Set the model's scale and local position after checking its size and origin.
-        BoundingBox bounds = (BoundingBox) model.getWorldBound();
-
-        float modelWidth = bounds.getXExtent() * 2f;
-        float modelHeight = bounds.getYExtent() * 2f;
-        float modelDepth = bounds.getZExtent() * 2f;
-
-        float margin = 0.9f;
-        float modelScale = Math.min(
-            margin * width / modelWidth,
-            Math.min(
-                margin * STAND_HEIGHT / modelHeight,
-                margin * depth / modelDepth
-            )
-        );
-
-        Vector3f center = bounds.getCenter().clone();
-        Vector3f min = bounds.getMin(new Vector3f());
-
-        model.setLocalScale(modelScale);
-        model.setLocalTranslation(
-            -center.x * modelScale,
-            -min.y * modelScale,
-            -center.z * modelScale
-        );
-        unitNode.attachChild(model);
-        updateHeight();
-
-        return unitNode;
-    }
-
-    private void createFrame(AssetManager assetManager) {
-        Vector3f[] corners = new Vector3f[8];
-
-        for (int i = 0; i < corners.length; i++) {
-            float x = (i & 1) == 0 ? -width / 2f : width / 2f;
-            float y = (i & 2) == 0 ? -height / 2f : height / 2f;
-            float z = (i & 4) == 0 ? -depth / 2f : depth / 2f;
-            corners[i] = new Vector3f(x, y, z);
-        }
-
-        int[][] edges = {
-            {0, 1}, {2, 3}, {4, 5}, {6, 7},
-            {0, 2}, {1, 3}, {4, 6}, {5, 7},
-            {0, 4}, {1, 5}, {2, 6}, {3, 7}
-        };
-
-        Vector3f[] endpoints = new Vector3f[edges.length * 2];
-        int index = 0;
-
-        for (int[] edge : edges) {
-            endpoints[index++] = corners[edge[0]];
-            endpoints[index++] = corners[edge[1]];
-        }
-
-        Mesh mesh = new Mesh();
-        mesh.setMode(Mesh.Mode.Lines);
-        mesh.setBuffer(
-            VertexBuffer.Type.Position,
-            3,
-            BufferUtils.createFloatBuffer(endpoints)
-        );
-        mesh.updateBound();
-
-        frameGeometry = new Geometry("UnitFrame", mesh);
-        frameMaterial = new Material(
-            assetManager,
-            "Common/MatDefs/Misc/Unshaded.j3md"
-        );
-        frameMaterial.setColor("Color", enemy ? ColorRGBA.Red : ColorRGBA.Blue);
-        frameGeometry.setMaterial(frameMaterial);
-        unitNode.attachChild(frameGeometry);
+        visual = new UnitVisual(assetManager, width, height, depth, isEnemy, STAND_HEIGHT, getHeight());
+        return visual.getNode();
+        
     }
 
     public void setSelected(boolean selected) {
-        frameMaterial.setColor(
-            "Color",
-            selected ? new ColorRGBA(0.5f, 0f, 0.5f, 1f) : ColorRGBA.Blue
-        );
+        visual.setSelected(selected, enemy);
     }
 
     //Movement
     public void moveTo(int tileX, int tileZ, Vector3f position) {
         this.tileX = tileX;
         this.tileZ = tileZ;
-        unitNode.setLocalTranslation(position.x, 0f, position.z);
+        getUnitNode().setLocalTranslation(position.x, 0f, position.z);
     }
 
     public boolean moveTowards(
         int tileX, int tileZ, Vector3f target, float maxDistance) {
-        Vector3f current = unitNode.getLocalTranslation();
+        Vector3f current = getUnitNode().getLocalTranslation();
         float dx = target.x - current.x;
         float dz = target.z - current.z;
         float distance = (float) Math.sqrt(dx * dx + dz * dz);
 
         if (dx != 0f || dz != 0f) {
-            float yaw = (float) Math.atan2(dx, dz);
-            model.setLocalRotation(
-                new Quaternion().fromAngleAxis(yaw, Vector3f.UNIT_Y)
-            );
+            visual.faceTowards(dx, dz);
         }
 
         if (distance <= maxDistance || distance == 0f) {
-            unitNode.setLocalTranslation(target.x, 0f, target.z);
+            getUnitNode().setLocalTranslation(target.x, 0f, target.z);
             this.tileX = tileX;
             this.tileZ = tileZ;
             return true;
         }
 
         float fraction = maxDistance / distance;
-        unitNode.setLocalTranslation(
+        getUnitNode().setLocalTranslation(
             current.x + dx * fraction,
             0f,
             current.z + dz * fraction
         );
         return false;
-    }
-
-    private void updateHeight() {
-        float verticalScale = getHeight();
-        float centerY = getHeight() / 2f;
-        unitNode.setLocalScale(1f, 1f, 1f);
-
-        frameGeometry.setLocalScale(1f, verticalScale, 1f);
-        frameGeometry.setLocalTranslation(0f, centerY, 0f);
-
-        pickingGeometry.setLocalScale(1f, verticalScale, 1f);
-        pickingGeometry.setLocalTranslation(0f, centerY, 0f);
     }
 
     public void crouch() {
@@ -242,41 +102,19 @@ public class GameEntity {
         }
 
         this.standing = standing;
-        updateHeight();
+        visual.updateHeight(getHeight());
     }
 
     public void faceTowards(GameEntity target) {
-        Vector3f from = unitNode.getLocalTranslation();
+        Vector3f from = getUnitNode().getLocalTranslation();
         Vector3f to = target.getUnitNode().getLocalTranslation();
 
         float dx = to.x - from.x;
         float dz = to.z - from.z;
 
         if (dx != 0f || dz != 0f) {
-            float yaw = (float) Math.atan2(dx, dz);
-            model.setLocalRotation(
-                new Quaternion().fromAngleAxis(yaw, Vector3f.UNIT_Y)
-            );
+            visual.faceTowards(dx, dz);
         }
-    }
-
-
-    private AnimComposer findAnimComposer(Spatial spatial) {
-        AnimComposer composer = spatial.getControl(AnimComposer.class);
-        if (composer != null) {
-            return composer;
-        }
-
-        if (spatial instanceof Node node) {
-            for (Spatial child : node.getChildren()) {
-                composer = findAnimComposer(child);
-                if (composer != null) {
-                    return composer;
-                }
-            }
-        }
-
-        return null;
     }
 
     //Combat
@@ -286,12 +124,7 @@ public class GameEntity {
     }
 
     public void playAttackAnimation(GameEntity target) {
-        attackTarget = target;
-        animComposer.setCurrentAction(
-            "AttackLoop",
-            AnimComposer.DEFAULT_LAYER,
-            false
-        );
+        visual.playAttackAnimation(() -> target.applyDamage(damageOutput));
     }
 
     public void applyAttackDamage() {
@@ -314,11 +147,11 @@ public class GameEntity {
     }
 
     public Geometry getGeometry() {
-        return pickingGeometry;
+        return visual.getGeometry();
     }
 
     public Node getUnitNode() {
-        return unitNode;
+        return visual.getNode();
     }
 
     public int getHeight() {
@@ -342,16 +175,6 @@ public class GameEntity {
     }
 
     public void setWalking(boolean walking) {
-        if (this.walking == walking) {
-            return;
-        }
-
-        this.walking = walking;
-
-        if (walking) {
-            animComposer.setCurrentAction("ArmatureAction");
-        } else {
-            animComposer.setCurrentAction("Idle");
-        }
+        visual.setWalking(walking);
     }
 }
