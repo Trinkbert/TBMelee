@@ -22,6 +22,11 @@ public class GameControls {
     private final GameScene gameScene;
     private boolean orbiting;
 
+    private boolean arrowUpPressed;
+    private boolean arrowDownPressed;
+    private boolean arrowLeftPressed;
+    private boolean arrowRightPressed;
+
     public GameControls(InputManager inputManager, GameCamera gameCamera, Camera camera, GameScene gameScene) {
         this.inputManager = inputManager;
         this.gameCamera = gameCamera;
@@ -56,6 +61,10 @@ public class GameControls {
         inputManager.addMapping("ToggleCameraMode", new KeyTrigger(KeyInput.KEY_TAB));
         inputManager.addMapping("RotateClockwise", new KeyTrigger(KeyInput.KEY_E));
         inputManager.addMapping("RotateCounterClockwise", new KeyTrigger(KeyInput.KEY_Q));
+        inputManager.addMapping("ArrowUp", new KeyTrigger(KeyInput.KEY_UP));
+        inputManager.addMapping("ArrowDown", new KeyTrigger(KeyInput.KEY_DOWN));
+        inputManager.addMapping("ArrowLeft", new KeyTrigger(KeyInput.KEY_LEFT));
+        inputManager.addMapping("ArrowRight", new KeyTrigger(KeyInput.KEY_RIGHT));
 
         inputManager.addListener((AnalogListener) (name, value, tpf) -> {
             if ("ZoomIn".equals(name)) {
@@ -104,9 +113,13 @@ public class GameControls {
                     if (isPressed && gameCamera.isOrthographic()) {
                         gameCamera.rotateQuarterTurn(1f);
                     }
-}
+                }
+                case "ArrowUp" -> arrowUpPressed = isPressed;
+                case "ArrowDown" -> arrowDownPressed = isPressed;
+                case "ArrowLeft" -> arrowLeftPressed = isPressed;
+                case "ArrowRight" -> arrowRightPressed = isPressed;
             }
-        }, "Orbit", "Select", "Crouch", "Stand","ToggleCameraMode", "RotateCounterClockwise", "RotateClockwise");
+        }, "Orbit", "Select", "Crouch", "Stand","ToggleCameraMode", "RotateCounterClockwise", "RotateClockwise", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight");
     }
 
     private void selectUnitUnderCursor() {
@@ -147,7 +160,7 @@ public class GameControls {
             return;
         }
 
-gameScene.selectUnit(closestUnit);
+        gameScene.selectUnit(closestUnit);
     }
 
     private void moveSelectedUnitToGround(Ray ray) {
@@ -171,6 +184,15 @@ gameScene.selectUnit(closestUnit);
         int tileZ = (int) Math.floor(hit.z);
 
         gameScene.handleMoveClick(tileX, tileZ);
+    }
+
+    public void update(float tpf) {
+        float horizontal = (arrowRightPressed ? 1f : 0f) - (arrowLeftPressed ? 1f : 0f);
+        float forward = (arrowUpPressed ? 1f : 0f) - (arrowDownPressed ? 1f : 0f);
+
+        if (horizontal != 0f || forward != 0f) {
+            gameCamera.pan(horizontal, forward, tpf);
+        }
     }
     
 }

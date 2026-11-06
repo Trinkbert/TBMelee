@@ -23,6 +23,7 @@ public class GameEntity {
     private static final float STAND_HEIGHT = 2f;
     private boolean standing = true;
 
+    //Visual
     private UnitVisual visual;
     private AnimComposer animComposer;
 

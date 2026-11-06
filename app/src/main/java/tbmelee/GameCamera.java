@@ -60,6 +60,24 @@ public class GameCamera {
         }
     }
 
+    public void pan(float horizontal, float forward, float tpf) {
+        Vector3f forwardDirection = camera.getDirection().clone();
+        forwardDirection.y = 0f;
+        forwardDirection.normalizeLocal();
+
+        Vector3f rightDirection = camera.getLeft().negate();
+        rightDirection.y = 0f;
+        rightDirection.normalizeLocal();
+
+        Vector3f movement = rightDirection.mult(horizontal)
+            .addLocal(forwardDirection.mult(forward))
+            .normalizeLocal()
+            .multLocal(12f * tpf);
+
+        target.addLocal(movement);
+        updateOrbitPosition();
+    }
+
     private void updateFrustum() {
         float aspect = (float) camera.getWidth() / camera.getHeight();
 
