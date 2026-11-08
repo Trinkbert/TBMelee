@@ -154,6 +154,22 @@ public class GameScene {
         }
     }
 
+    public boolean isAttackAnimationPlaying() {
+        for (GameEntity unit : units) {
+            if (unit.isAttackAnimationPlaying()) {
+                return true;
+            }
+        }
+
+        for (GameEntity enemy : enemies) {
+            if (enemy.isAttackAnimationPlaying()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     // Getters
     public List<GameEntity> getUnits() {
         return List.copyOf(units);

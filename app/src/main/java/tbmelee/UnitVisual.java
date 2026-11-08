@@ -29,6 +29,7 @@ public class UnitVisual {
     private boolean walking;
 
     private Runnable attackCompletion;
+    private boolean attackAnimationPlaying;
 
     public UnitVisual(AssetManager assetManager, float width, float height, float depth, boolean isEnemy, float standHeight, float getHeight) {
         Box box = new Box(width / 2f, height / 2f, depth / 2f);
@@ -174,6 +175,7 @@ public class UnitVisual {
 
     public void playAttackAnimation(Runnable onComplete) {
         attackCompletion = onComplete;
+        attackAnimationPlaying = true;
         animComposer.setCurrentAction(
             "AttackOnce",
             AnimComposer.DEFAULT_LAYER,
@@ -183,6 +185,7 @@ public class UnitVisual {
 
     public void finishAttack() {
         animComposer.setCurrentAction("Idle");
+        attackAnimationPlaying = false;
 
         Runnable completion = attackCompletion;
         attackCompletion = null;
@@ -226,6 +229,10 @@ public class UnitVisual {
 
     public Geometry getGeometry() {
         return pickingGeometry;
+    }
+
+    public boolean isAttackAnimationPlaying() {
+        return attackAnimationPlaying;
     }
     
 }

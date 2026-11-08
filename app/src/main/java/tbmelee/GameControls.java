@@ -85,7 +85,7 @@ public class GameControls {
             switch (name) {
                 case "Orbit" -> orbiting = isPressed && !gameCamera.isOrthographic();
                 case "Select" -> {
-                    if (isPressed) {
+                    if (isPressed && !gameScene.isAttackAnimationPlaying()) {
                         selectUnitUnderCursor();
                     }
                 }

@@ -178,4 +178,8 @@ public class GameEntity {
     public void setWalking(boolean walking) {
         visual.setWalking(walking);
     }
+
+    public boolean isAttackAnimationPlaying() {
+        return visual.isAttackAnimationPlaying();
+    }
 }
