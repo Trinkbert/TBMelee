@@ -97,11 +97,7 @@ public class UnitMovementController {
         Tile start = new Tile(unit.getTileX(), unit.getTileZ());
         Tile destination = new Tile(destinationX, destinationZ);
 
-            Set<Tile> blockedTiles = new HashSet<>();
-            addBlockedTiles(blockedTiles, units, unit);
-            addBlockedTiles(blockedTiles, enemies, unit);
-
-        return pathfinder.findPath(start, destination, blockedTiles).tiles();
+        return pathfinder.findPath(start, destination, buildBlockedTiles(unit)).tiles();
     }
 
     private void addBlockedTiles(Set<Tile> blockedTiles, List<GameEntity> entities, GameEntity movingUnit) {
@@ -110,6 +106,13 @@ public class UnitMovementController {
                 blockedTiles.add(new Tile(entity.getTileX(), entity.getTileZ()));
             }
         }
+    }
+
+    private Set<Tile> buildBlockedTiles(GameEntity unit) {
+        Set<Tile> blockedTiles = new HashSet<>();
+        addBlockedTiles(blockedTiles, units, unit);
+        addBlockedTiles(blockedTiles, enemies, unit);
+        return blockedTiles;
     }
 
     private void showPath(List<Tile> path) {
@@ -124,6 +127,66 @@ public class UnitMovementController {
             marker.setLocalTranslation(tile.x() + 0.5f, 0.04f, tile.z() + 0.5f);
             previewNode.attachChild(marker);
         }
+    }
+
+    public Tile findAttackDestination(GameEntity unit, GameEntity target) {
+        if (unit == null || target == null) {
+            return null;
+        }
+
+        Tile start = new Tile(unit.getTileX(), unit.getTileZ());
+        Set<Tile> blockedTiles = buildBlockedTiles(unit);
+        Tile bestDestination = null;
+        float bestCost = Float.POSITIVE_INFINITY;
+        int reach = unit.getWeaponReach();
+
+        for (int dx = -reach; dx <= reach; dx++) {
+            for (int dz = -reach; dz <= reach; dz++) {
+                if (dx == 0 && dz == 0
+                        || Math.max(Math.abs(dx), Math.abs(dz)) > reach) {
+                    continue;
+                }
+
+                Tile candidate = new Tile(
+                    target.getTileX() + dx,
+                    target.getTileZ() + dz
+                );
+
+                if (!gameMap.isInsideMap(candidate.x(), candidate.z())
+                        || blockedTiles.contains(candidate)) {
+                    continue;
+                }
+
+                GridPathfinder.PathResult result =
+                    pathfinder.findPath(start, candidate, blockedTiles);
+
+                if (!result.reachesDestination()) {
+                    continue;
+                }
+
+                float cost = pathCost(start, result.tiles());
+                if (cost < bestCost) {
+                    bestCost = cost;
+                    bestDestination = candidate;
+                }
+            }
+        }
+
+        return bestDestination;
+    }
+
+    private float pathCost(Tile start, List<Tile> path) {
+        float cost = 0f;
+        Tile previous = start;
+
+        for (Tile tile : path) {
+            int dx = Math.abs(tile.x() - previous.x());
+            int dz = Math.abs(tile.z() - previous.z());
+            cost += dx != 0 && dz != 0 ? (float) Math.sqrt(2) : 1f;
+            previous = tile;
+        }
+
+        return cost;
     }
 
     public GameEntity update(float tpf) {

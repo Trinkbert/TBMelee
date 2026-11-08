@@ -106,12 +106,8 @@ public class GameScene {
         }
 
         removeEnemy();
-
-    }
-
-        
+    }      
     
-
     public void handleMoveClick(int tileX, int tileZ) {
         pendingAttackUnit = null;
         pendingAttackTarget = null;
@@ -135,12 +131,17 @@ public class GameScene {
             return;
         }
 
+        Tile destination = movementController.findAttackDestination(selectedUnit, target);
+        if (destination == null) {
+            return;
+        }
+
         pendingAttackUnit = selectedUnit;
         pendingAttackTarget = target;
         movementController.handleOrderClick(
             selectedUnit,
-            target.getTileX(),
-            target.getTileZ()
+            destination.x(),
+            destination.z()
         );
     }
 
