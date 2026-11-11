@@ -8,6 +8,7 @@ import com.jme3.math.ColorRGBA;
 public class App extends SimpleApplication {
     private GameScene scene;
     private GameControls gameControls;
+    private GameClock gameClock;
 
     public static void main(String[] args) {
         App app = new App();
@@ -35,10 +36,12 @@ public class App extends SimpleApplication {
             new ColorRGBA(0.15f, 0.15f, 0.18f, 1f)
         );
 
+        gameClock = new GameClock();
+
         GameCamera gameCamera = new GameCamera(cam);
         gameCamera.setup();
 
-        scene = new GameScene(rootNode, assetManager);
+        scene = new GameScene(rootNode, assetManager, gameClock);
         scene.build();
 
         gameControls = new GameControls(inputManager, gameCamera, cam, scene);

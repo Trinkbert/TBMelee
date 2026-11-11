@@ -58,6 +58,7 @@ public class GameControls {
         );
         inputManager.addMapping("Crouch", new KeyTrigger(KeyInput.KEY_C));
         inputManager.addMapping("Stand", new KeyTrigger(KeyInput.KEY_S));
+        inputManager.addMapping("AdvanceTurn", new KeyTrigger(KeyInput.KEY_D));
         inputManager.addMapping("ToggleCameraMode", new KeyTrigger(KeyInput.KEY_TAB));
         inputManager.addMapping("RotateClockwise", new KeyTrigger(KeyInput.KEY_E));
         inputManager.addMapping("RotateCounterClockwise", new KeyTrigger(KeyInput.KEY_Q));
@@ -118,8 +119,10 @@ public class GameControls {
                 case "ArrowDown" -> arrowDownPressed = isPressed;
                 case "ArrowLeft" -> arrowLeftPressed = isPressed;
                 case "ArrowRight" -> arrowRightPressed = isPressed;
+                case "AdvanceTurn" -> {if (isPressed) {gameScene.endTurn();}
+                }
             }
-        }, "Orbit", "Select", "Crouch", "Stand","ToggleCameraMode", "RotateCounterClockwise", "RotateClockwise", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight");
+        }, "Orbit", "Select", "Crouch", "Stand","ToggleCameraMode", "RotateCounterClockwise", "RotateClockwise", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "AdvanceTurn");
     }
 
     private void selectUnitUnderCursor() {

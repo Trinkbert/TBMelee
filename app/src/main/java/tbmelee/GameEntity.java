@@ -190,6 +190,11 @@ public class GameEntity {
         visual.updateStats(hitPoints, actionPoints);
     }
 
+    public void resetActionPoints() {
+        this.actionPoints = MAX_ACTION_POINTS;
+        visual.updateStats(hitPoints, actionPoints);
+    }
+
     public void setWalking(boolean walking) {
         visual.setWalking(walking);
     }

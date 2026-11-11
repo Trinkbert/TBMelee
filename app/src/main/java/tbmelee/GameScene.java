@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GameScene {
+    private final GameClock gameClock;
     private final GameMap gameMap;
     private final UnitMovementController movementController;
     private final List<GameEntity> units = new ArrayList<>();
@@ -24,10 +25,11 @@ public class GameScene {
     private final AssetManager assetManager;
     
 
-    public GameScene(Node rootNode, AssetManager assetManager) {
+    public GameScene(Node rootNode, AssetManager assetManager, GameClock gameClock) {
         this.rootNode = rootNode;
         this.assetManager = assetManager;
         this.gameMap = new GameMap(rootNode, assetManager);
+        this.gameClock = gameClock;
         this.movementController = new UnitMovementController(gameMap, rootNode, assetManager, units, enemies);
     }
 
@@ -168,6 +170,18 @@ public class GameScene {
         }
 
         return false;
+    }
+
+    public void endTurn() {
+        gameClock.advanceTurn();
+        System.out.println("Time: " + gameClock.getCurrentTime());
+        for (GameEntity unit : units) {
+            unit.resetActionPoints();
+        }
+
+        for (GameEntity enemy : enemies) {
+            enemy.resetActionPoints();
+        }
     }
 
     // Getters
