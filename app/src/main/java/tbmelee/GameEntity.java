@@ -51,6 +51,7 @@ public class GameEntity {
 
     public Node createGeometry(AssetManager assetManager, boolean isEnemy) {
         visual = new UnitVisual(assetManager, width, height, depth, isEnemy, STAND_HEIGHT, getHeight());
+        visual.updateStats(hitPoints, actionPoints);
         return visual.getNode();
         
     }
@@ -125,6 +126,7 @@ public class GameEntity {
     //Combat
     public void applyDamage(int damage) {
         hitPoints -= damage;
+        visual.updateStats(hitPoints, actionPoints);
         System.out.println("Unit Hitpoints: " + hitPoints);
     }
 
@@ -185,6 +187,7 @@ public class GameEntity {
 
     public void setActionPoints(int amount) {
         this.actionPoints -= amount;
+        visual.updateStats(hitPoints, actionPoints);
     }
 
     public void setWalking(boolean walking) {

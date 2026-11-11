@@ -1,25 +1,30 @@
 package tbmelee;
 
 
+import com.jme3.anim.AnimComposer;
+import com.jme3.anim.tween.Tweens;
+import com.jme3.asset.AssetManager;
+import com.jme3.bounding.BoundingBox;
+import com.jme3.font.BitmapFont;
+import com.jme3.font.BitmapText;
+import com.jme3.font.Rectangle;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.Quaternion;
+import com.jme3.math.Vector3f;
+import com.jme3.material.Material;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer;
-import com.jme3.util.BufferUtils;
-import com.jme3.anim.AnimComposer;
-import com.jme3.anim.tween.Tweens;
-import com.jme3.asset.AssetManager;
-import com.jme3.bounding.BoundingBox;
-import com.jme3.material.Material;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.Quaternion;
-import com.jme3.math.Vector3f;
 import com.jme3.scene.shape.Box;
+import com.jme3.scene.control.BillboardControl;
+import com.jme3.util.BufferUtils;
 
 public class UnitVisual {
     
     private final Node unitNode = new Node("Unit");
+    private final BitmapText statsLabel;
     private Geometry pickingGeometry;
     private AnimComposer animComposer;
     private Geometry frameGeometry;
@@ -39,6 +44,17 @@ public class UnitVisual {
 
         unitNode.attachChild(pickingGeometry);
         createFrame(assetManager, width, height, depth, isEnemy);
+
+        statsLabel = new BitmapText(
+            assetManager.loadFont("Interface/Fonts/Default.fnt")
+        );
+        statsLabel.setSize(0.35f);
+        statsLabel.setBox(new Rectangle(-1f, 0.5f, 2f, 1f));
+        statsLabel.setAlignment(BitmapFont.Align.Center);
+        statsLabel.setVerticalAlignment(BitmapFont.VAlign.Center);
+        statsLabel.addControl(new BillboardControl());
+        unitNode.attachChild(statsLabel);
+        updateStatsLabelPosition(getHeight);
 
         model = new ModelLoader().loadModel(assetManager, isEnemy);
         animComposer = findAnimComposer(model);
@@ -171,6 +187,8 @@ public class UnitVisual {
 
         pickingGeometry.setLocalScale(1f, verticalScale, 1f);
         pickingGeometry.setLocalTranslation(0f, centerY, 0f);
+
+        updateStatsLabelPosition(getHeight);
     }
 
     public void playAttackAnimation(Runnable onComplete) {
@@ -220,6 +238,15 @@ public class UnitVisual {
                 new Quaternion().fromAngleAxis(yaw, Vector3f.UNIT_Y)
             );
         }
+    }
+
+    //Label for displaying stats above the unit
+    public void updateStats(int hitPoints, int actionPoints) {
+        statsLabel.setText("HP: " + hitPoints + "\nAP: " + actionPoints);
+    }
+
+    private void updateStatsLabelPosition(float height) {
+        statsLabel.setLocalTranslation(0f, height + 0.2f, 0f);
     }
 
     //Getters and Setters
