@@ -32,6 +32,10 @@ public class GameEntity {
     private int damageOutput = 1;
     private int weaponReach = 1;
     private GameEntity attackTarget;
+
+    //Action Points
+    private static final int MAX_ACTION_POINTS = 20;
+    private int actionPoints = MAX_ACTION_POINTS;
     
 
     public GameEntity(int tileX, int tileZ,
@@ -173,6 +177,10 @@ public class GameEntity {
 
     public int getWeaponReach() {
         return weaponReach;
+    }
+
+    public int getActionPoints() {
+        return actionPoints;
     }
 
     public void setWalking(boolean walking) {

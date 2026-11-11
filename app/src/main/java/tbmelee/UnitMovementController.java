@@ -4,9 +4,13 @@ import com.jme3.math.Vector3f;
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.font.Rectangle;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Box;
+import com.jme3.font.BitmapText;
+import com.jme3.font.BitmapFont;
+import com.jme3.scene.control.BillboardControl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ArrayDeque;
@@ -19,6 +23,7 @@ public class UnitMovementController {
     private final Material previewMaterial;
     private final GameMap gameMap;
     private final GridPathfinder pathfinder;
+    private final BitmapFont previewFont;
 
     private static final float MOVE_SPEED = 3f;
     private final Deque<Tile> activePath = new ArrayDeque<>();
@@ -36,6 +41,8 @@ public class UnitMovementController {
         this.pathfinder = new GridPathfinder(gameMap);
         this.units = units;
         this.enemies = enemies;
+
+        previewFont = assetManager.loadFont("Interface/Fonts/Default.fnt");
 
         previewNode = new Node("MovePathPreview");
         rootNode.attachChild(previewNode);
@@ -63,7 +70,7 @@ public class UnitMovementController {
             pendingTileZ = tileZ;
             pendingPath.clear();
             pendingPath.addAll(buildPath(unit, tileX, tileZ));
-            showPath(pendingPath);
+            showPath(unit, tileX, tileZ, pendingPath);
             return;
         }
 
@@ -115,7 +122,7 @@ public class UnitMovementController {
         return blockedTiles;
     }
 
-    private void showPath(List<Tile> path) {
+    private void showPath(GameEntity unit, int tileX, int tileZ, List<Tile> path) {
         previewNode.detachAllChildren();
 
         for (Tile tile : path) {
@@ -126,7 +133,18 @@ public class UnitMovementController {
             marker.setMaterial(previewMaterial);
             marker.setLocalTranslation(tile.x() + 0.5f, 0.04f, tile.z() + 0.5f);
             previewNode.attachChild(marker);
-        }
+        }       
+            
+            BitmapText costLabel = new BitmapText(previewFont);
+            costLabel.setText(Integer.toString(calculateActionPointCost(unit, path)));
+            costLabel.setColor(ColorRGBA.Black);
+            costLabel.setSize(0.5f);
+            costLabel.setBox(new Rectangle(-1f, 0f, 2f, 0f));
+            costLabel.setAlignment(BitmapFont.Align.Center);
+            costLabel.setVerticalAlignment(BitmapFont.VAlign.Center);
+            costLabel.setLocalTranslation(tileX + 0.5f, 0.5f, tileZ + 0.5f);
+            costLabel.addControl(new BillboardControl());
+            previewNode.attachChild(costLabel);
     }
 
     public Tile findAttackDestination(GameEntity unit, GameEntity target) {
@@ -228,6 +246,23 @@ public class UnitMovementController {
             return completedUnit;
         }
         return null;
+    }
+
+    private int calculateActionPointCost(GameEntity unit, List<Tile> path) {
+        int cost = 0;
+        int previousX = unit.getTileX();
+        int previousZ = unit.getTileZ();
+
+        for (Tile tile : path) {
+            int dx = Math.abs(tile.x() - previousX);
+            int dz = Math.abs(tile.z() - previousZ);
+
+            cost += dx != 0 && dz != 0 ? 3 : 2;
+            previousX = tile.x();
+            previousZ = tile.z();
+        }
+
+        return cost;
     }
 
 }
