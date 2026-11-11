@@ -226,9 +226,12 @@ public class UnitMovementController {
             float segmentDistance = (float) Math.sqrt(dx * dx + dz * dz);
 
             if (segmentDistance <= distanceLeft) {
+
                 activeUnit.moveTowards(
                     next.x(), next.z(), target, distanceLeft
                 );
+                activeUnit.setActionPoints(dx != 0 && dz != 0 ? 3 : 2);
+                System.out.println("Current action points: " + activeUnit.getActionPoints());
                 distanceLeft -= segmentDistance;
                 activePath.removeFirst();
             } else {

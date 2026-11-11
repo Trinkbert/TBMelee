@@ -183,6 +183,10 @@ public class GameEntity {
         return actionPoints;
     }
 
+    public void setActionPoints(int amount) {
+        this.actionPoints -= amount;
+    }
+
     public void setWalking(boolean walking) {
         visual.setWalking(walking);
     }
