@@ -77,6 +77,9 @@ public class GameScene {
         spawnUnit(11, 9, true);
         spawnUnit(11, 11, true);
 
+        //Autoselect the first unit
+        selectUnit(units.get(0));
+
         // Light the scene
         AmbientLight ambient = new AmbientLight();
         ambient.setColor(ColorRGBA.White);
