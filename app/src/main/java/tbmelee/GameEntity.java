@@ -185,7 +185,7 @@ public class GameEntity {
         return actionPoints;
     }
 
-    public void setActionPoints(int amount) {
+    public void spendActionPoints(int amount) {
         this.actionPoints -= amount;
         visual.updateStats(hitPoints, actionPoints);
     }

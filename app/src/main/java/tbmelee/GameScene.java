@@ -20,6 +20,14 @@ public class GameScene {
     private GameEntity selectedUnit;
     private GameEntity pendingAttackUnit;
     private GameEntity pendingAttackTarget;
+    private static final int ATTACK_AP_COST = 7;
+
+    private enum TurnSide {
+        PLAYER,
+        ENEMY
+    }
+
+    private TurnSide currentTurn = TurnSide.PLAYER;
 
     private final Node rootNode;
     private final AssetManager assetManager;
@@ -107,6 +115,11 @@ public class GameScene {
             handleAttackClick(target);
         }
 
+            if (currentTurn == TurnSide.ENEMY) {
+                // TO-DO: Enemy actions will go here later.
+                finishEnemyTurn();
+            }
+
         removeEnemy();
     }      
     
@@ -126,6 +139,11 @@ public class GameScene {
         int distance = Math.max(distanceX, distanceZ);
 
         if (distance <= selectedUnit.getWeaponReach()) {
+            if (selectedUnit.getActionPoints() < ATTACK_AP_COST) {
+                return;
+            }
+
+            selectedUnit.spendActionPoints(ATTACK_AP_COST);
             selectedUnit.faceTowards(target);
             selectedUnit.playAttackAnimation(target);
             pendingAttackUnit = null;
@@ -173,15 +191,25 @@ public class GameScene {
     }
 
     public void endTurn() {
+        if (currentTurn != TurnSide.PLAYER) {
+            return;
+        }
         gameClock.advanceTurn();
         System.out.println("Time: " + gameClock.getCurrentTime());
-        for (GameEntity unit : units) {
-            unit.resetActionPoints();
-        }
+
+        currentTurn = TurnSide.ENEMY;
 
         for (GameEntity enemy : enemies) {
             enemy.resetActionPoints();
         }
+    }
+
+    private void finishEnemyTurn() {
+        for (GameEntity unit : units) {
+            unit.resetActionPoints();
+        }
+
+        currentTurn = TurnSide.PLAYER;
     }
 
     // Getters

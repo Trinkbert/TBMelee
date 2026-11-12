@@ -224,13 +224,19 @@ public class UnitMovementController {
             float dx = target.x - current.x;
             float dz = target.z - current.z;
             float segmentDistance = (float) Math.sqrt(dx * dx + dz * dz);
+            int stepCost = dx != 0f && dz != 0f ? 3 : 2;
+
+            if (activeUnit.getActionPoints() < stepCost) {
+                activePath.clear();
+                break;
+            }
 
             if (segmentDistance <= distanceLeft) {
 
                 activeUnit.moveTowards(
                     next.x(), next.z(), target, distanceLeft
                 );
-                activeUnit.setActionPoints(dx != 0 && dz != 0 ? 3 : 2);
+                activeUnit.spendActionPoints(dx != 0 && dz != 0 ? 3 : 2);
                 System.out.println("Current action points: " + activeUnit.getActionPoints());
                 distanceLeft -= segmentDistance;
                 activePath.removeFirst();
