@@ -38,3 +38,8 @@ cd TBMelee
 .\gradlew.bat :app:run
 
 Alternatively, open the project in Visual Studio Code and run the application's main() method using the Java extension.
+
+## Documentation:
+
+The build process is documented here:
+https://bsky.app/profile/trinkbert.bsky.social
